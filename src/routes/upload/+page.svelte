@@ -47,9 +47,12 @@ async function handleSubmit(event: Event) {
     });
     const result = await response.json();
     if (response.ok && result.success) {
-      successMsg = result.feedback;
+      // Redirect to /results with feedback in history state
+      window.history.pushState({ feedback: result }, '', '/results');
+      window.location.assign('/results');
       file = null;
       textInput = '';
+      return;
     } else {
       errorMsg = result.error || 'An error occurred.';
     }
