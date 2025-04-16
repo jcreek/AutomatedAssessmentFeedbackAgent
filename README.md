@@ -1,6 +1,13 @@
 # AI-Powered Automated Assessment and Feedback Agent
 
----
+> An intelligent, agentic AI system designed to significantly reduce teachers' workloads by providing instant assessment and personalized differentiated feedback and follow-on activities for student assignments.
+
+
+## ⚡ Workflow At a Glance
+- Upload an assignment and student response (file or text)
+- Instantly receive detailed, actionable feedback and differentiated individualized follow-on tasks and a grade
+- Review, delete, or clear past assessments in the history
+- All actions are accessible, error-proof, and demo resilient
 
 ## 🏆 Hackathon Info
 
@@ -9,28 +16,23 @@ This project was developed for the [Microsoft Hack Together: AI Agents Hackathon
 - See the [Official Rules](https://microsoft.github.io/AI_Agents_Hackathon/rules/)
 - Status: Hackathon prototype/MVP
 
----
 
-
-> An intelligent, automated system designed to significantly reduce teachers' workload by providing instant assessment and personalized feedback for student assignments.
-
----
-
-## 🎯 Key Features
-
-- **Automated Grading:** Instantly grades student submissions across various assignment types, including short answers, essays, and quizzes.
-- **Personalized Feedback:** Provides detailed, actionable feedback tailored to each student's individual performance and learning needs.
-- **Resource Recommendations:** Suggests targeted educational resources based on identified strengths and weaknesses to support ongoing learning.
-
----
+## 🎯 What It Does (Key Features)
+- **Automated Grading:** Instantly grades student submissions (text or file) for any assignment/task.
+- **Personalized Feedback:** Actionable, contextual feedback including grade, strengths, areas for improvement, individualized activity, and teacher suggestion.
+- **Assessment History:** All assessments are saved locally (browser localStorage) for later review and demo resilience.
+- **History Management:** Delete individual assessments or clear all history, with confirmation dialogs for safety.
+- **Navigation:** Seamless navigation between upload and results/history pages.
+- **Robust Error Handling:** Friendly, actionable error messages for upload, AI, or network issues.
+- **Loading Spinner:** Visual feedback while grading is in progress.
+- **Accessibility:** Screen reader-friendly, keyboard-accessible, and color-contrast aware.
 
 ## ⚙️ How It Works
 
-1. **Teacher uploads student submissions** through an easy-to-use interface.
-2. **AI analysis powered by Azure OpenAI and Cognitive Services** quickly assesses student work.
-3. **Detailed, individualized feedback** is generated immediately, enabling teachers to efficiently review and share results with students.
-
----
+1. **Teacher uploads a student submission** (file or text) and assignment description.
+2. **AI (Azure OpenAI)** generates instant, individualized feedback and a grade.
+3. **Results and assessment history** are displayed for review, deletion, or clearing.
+4. **All data is stored locally** (no backend required for history/demo).
 
 ## 🚀 Technical Stack
 
@@ -38,7 +40,6 @@ This project was developed for the [Microsoft Hack Together: AI Agents Hackathon
 - **Azure OpenAI:** Provides advanced NLP capabilities for nuanced and accurate assessment.
 - **Azure Cognitive Services:** Enhances semantic analysis for precise feedback generation.
 
----
 
 ## 📖 Educational Impact
 
@@ -46,7 +47,6 @@ This project was developed for the [Microsoft Hack Together: AI Agents Hackathon
 - Improves quality and consistency of student feedback.
 - Allows teachers more time to focus on direct student interaction and lesson planning.
 
----
 
 ## 🔮 Future Enhancements
 
@@ -54,19 +54,16 @@ This project was developed for the [Microsoft Hack Together: AI Agents Hackathon
 - Expansion of supported assignment types and subjects.
 - Development of analytics dashboards for deeper insights into class performance.
 
----
 
 ## 📽️ Demonstration Video
 
 [Coming soon: View a full demonstration of the agent in action.]
 
----
 
 ## 👥 Team
 - **Josh Creek**  
   [jcreek.co.uk](https://jcreek.co.uk)
 
----
 
 ## 🛠️ Getting Started
 
@@ -99,13 +96,11 @@ pnpm run build
 
 You can preview the production build with `npm run preview`.
 
----
 
 ## 📚 Resources
 - [Hack Together: AI Agents Hackathon – Introduction & Getting Started](https://www.youtube.com/watch?v=RNphlRKvmJQ)
 - [Hack Together: AI Agents Hackathon – Building Your Agent](https://www.youtube.com/watch?v=Aq30zfbWNSQ)
 
----
 
 ## 📌 License
 Licensed under the Business Source License 1.1.  
