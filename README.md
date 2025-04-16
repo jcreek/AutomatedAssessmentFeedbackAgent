@@ -77,11 +77,27 @@ This project uses [SvelteKit](https://kit.svelte.dev/) and [TypeScript](https://
 - [pnpm](https://pnpm.io/installation)
 
 ### Installation & Running Locally
+
+#### Developing
+
+Once you've installed dependencies with `pnpm install`, start a development server:
+
 ```bash
-pnpm install
-pnpm dev
+pnpm run dev
+
+# or start the server and open the app in a new browser tab
+pnpm run dev -- --open
 ```
-The app will be available at `http://localhost:5173` (or the port shown in your terminal).
+
+#### Building
+
+To create a production version:
+
+```bash
+pnpm run build
+```
+
+You can preview the production build with `npm run preview`.
 
 ---
 
