@@ -4,7 +4,7 @@
 
 ## 🏆 Hackathon Info
 
-This project was developed for the [Microsoft Hack Together: AI Agents Hackathon](https://microsoft.github.io/AI_Agents_Hackathon/rules/) (April 8–30, 2025).
+This project was developed for the [Microsoft Hack Together: AI Agents Hackathon](https://microsoft.github.io/AI_Agents_Hackathon/) (April 8–30, 2025).
 
 - See the [Official Rules](https://microsoft.github.io/AI_Agents_Hackathon/rules/)
 - Status: Hackathon prototype/MVP
