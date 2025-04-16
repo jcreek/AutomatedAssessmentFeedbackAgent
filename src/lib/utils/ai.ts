@@ -5,8 +5,16 @@ const OPENAI_ENDPOINT = process.env['AZURE_OPENAI_ENDPOINT'];
 const OPENAI_DEPLOYMENT = process.env['AZURE_OPENAI_DEPLOYMENT'] || 'gpt-4';
 
 // Prompt template for grading and feedback
-export function buildGradingPrompt(submission: string) {
-  return `You are an expert secondary school teacher and AI assessment agent. Assess the following student submission using the following steps:
+export function buildGradingPrompt(submission: string, task: string) {
+  return `You are an expert secondary school teacher and AI assessment agent. Assess the following student submission in the context of the assignment/task provided.
+
+TASK/ASSIGNMENT:
+${task}
+
+STUDENT SUBMISSION:
+${submission}
+
+Follow these steps:
 1. Grade the work out of 10, using clear, objective criteria.
 2. Identify specific strengths, referencing the success criteria.
 3. Identify misconceptions or areas for improvement, using formative assessment language.
@@ -18,9 +26,6 @@ export function buildGradingPrompt(submission: string) {
 6. Suggest to the teacher one way to support this student in the next lesson.
 7. Show your reasoning step by step (chain-of-thought).
 
-STUDENT SUBMISSION:
-${submission}
-
 RESPONSE FORMAT:
 Grade: <number>/10
 Strengths: <text>
@@ -31,12 +36,12 @@ Teacher Suggestion: <text>
 Reasoning: <step-by-step explanation>`;
 }
 
-export async function gradeWithOpenAI(submission: string): Promise<OpenAIResponse> {
+export async function gradeWithOpenAI(submission: string, task: string): Promise<OpenAIResponse> {
   if (!OPENAI_API_KEY || !OPENAI_ENDPOINT) {
     // Fallback for local/demo mode
     return {
       grade: '7/10',
-      strengths: 'Clear argument and good evidence.',
+      strengths: 'Clear argument and good evidence (in response to the task: ' + task + ").",
       areas_for_improvement: 'Needs deeper analysis and more examples.',
       individualized_activity: 'Write a paragraph expanding on your main point and provide two additional examples to support your argument.',
       reflection_question: 'What was the most challenging part of this assignment for you, and why?',
@@ -45,7 +50,7 @@ export async function gradeWithOpenAI(submission: string): Promise<OpenAIRespons
     };
   }
 
-  const prompt = buildGradingPrompt(submission);
+  const prompt = buildGradingPrompt(submission, task);
 
   const res = await fetch(`${OPENAI_ENDPOINT}/openai/deployments/${OPENAI_DEPLOYMENT}/chat/completions?api-version=2024-02-15-preview`, {
     method: 'POST',

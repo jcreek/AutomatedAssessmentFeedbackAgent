@@ -7,7 +7,12 @@ export const POST: RequestHandler = async (event: RequestEvent) => {
     const data = await event.request.formData();
     const file = data.get('file');
     const text = data.get('text');
+    const task = data.get('task');
     let submission = '';
+
+    if (!task || typeof task !== 'string' || !task.trim()) {
+      return new Response(JSON.stringify({ error: 'Task/assignment description is required.' }), { status: 400 });
+    }
 
     if (file && typeof file === 'object' && 'arrayBuffer' in file && 'name' in file) {
       // Only support .txt for now for hackathon speed
@@ -24,11 +29,12 @@ export const POST: RequestHandler = async (event: RequestEvent) => {
     }
 
     // Call the AI grading agent
-    const aiResult = await gradeWithOpenAI(submission);
+    const aiResult = await gradeWithOpenAI(submission, task.trim());
 
     return new Response(JSON.stringify({
       success: true,
-      feedback: `Grade: ${aiResult.grade}\nStrengths: ${aiResult.strengths}\nWeaknesses: ${aiResult.weaknesses}\nIndividualized Activity: ${aiResult.individualized_activity}\nReasoning: ${aiResult.reasoning}`,
+      task: task.trim(),
+      feedback: `Grade: ${aiResult.grade}\nStrengths: ${aiResult.strengths}\nAreas for Improvement: ${aiResult.areas_for_improvement}\nIndividualized Activity: ${aiResult.individualized_activity}\nReasoning: ${aiResult.reasoning}`,
       ...aiResult
     }), {
       status: 200,
