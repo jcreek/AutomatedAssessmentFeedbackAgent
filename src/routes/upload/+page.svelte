@@ -47,12 +47,20 @@ async function handleSubmit(event: Event) {
     formData.append('text', textInput.trim());
   }
 
+  errorMsg = '';
   try {
     const response = await fetch('/api/grade', {
       method: 'POST',
       body: formData
     });
-    const result = await response.json();
+    let result;
+    try {
+      result = await response.json();
+    } catch {
+      errorMsg = 'Received an invalid response from the server.';
+      submitting = false;
+      return;
+    }
     if (response.ok && result.success) {
       // Save to localStorage history
       try {
@@ -73,10 +81,18 @@ async function handleSubmit(event: Event) {
       taskDescription = '';
       return;
     } else {
-      errorMsg = result.error || 'An error occurred.';
+      if (result && result.error) {
+        errorMsg = `Sorry, something went wrong: ${result.error}`;
+      } else if (response.status === 413) {
+        errorMsg = 'The uploaded file is too large. Please upload a smaller file.';
+      } else if (response.status >= 500) {
+        errorMsg = 'The server encountered an error. Please try again later.';
+      } else {
+        errorMsg = 'An unknown error occurred. Please check your input and try again.';
+      }
     }
   } catch (err) {
-    errorMsg = 'Network or server error.';
+    errorMsg = 'Network or server error. Please check your connection and try again.';
   } finally {
     submitting = false;
   }
@@ -87,11 +103,15 @@ async function handleSubmit(event: Event) {
 <section class="max-w-xl mx-auto py-12">
   <h1 class="text-2xl font-bold mb-4">Upload Student Submissions</h1>
   <p class="mb-6">Upload student assignments for instant AI-powered assessment and feedback.</p>
-  <form on:submit|preventDefault={handleSubmit} class="bg-white shadow rounded p-6 max-w-xl mx-auto mt-12">
-    <h1 class="text-2xl font-bold mb-4">Upload Student Submission</h1>
+  {#if errorMsg}
+    <div class="mb-4 p-3 border border-red-300 bg-red-50 text-red-700 rounded">
+      <strong>Error:</strong> {errorMsg}
+    </div>
+  {/if}
+  <form class="space-y-6" on:submit|preventDefault={handleSubmit}>
     <div class="mb-4">
-      <label class="block font-semibold mb-1" for="taskDescription">Task/Assignment Description <span class="text-red-500">*</span></label>
-      <textarea id="taskDescription" rows="3" class="w-full border p-2 rounded" bind:value={taskDescription} required placeholder="Describe the assignment, question, or task the student was responding to..."></textarea>
+      <label class="block mb-1 font-semibold" for="task">Task/Assignment Description <span class="text-red-500">*</span></label>
+      <textarea id="task" class="w-full border rounded p-2" rows="2" bind:value={taskDescription} required></textarea>
     </div>
     <div class="mb-4">
       <label class="block font-semibold mb-1" for="file">Upload a file (PDF, DOCX, TXT):</label>
