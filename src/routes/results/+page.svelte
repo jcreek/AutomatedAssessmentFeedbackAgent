@@ -42,26 +42,31 @@ onMount(() => {
   {#if !feedback && (!history || history.length === 0)}
     <div class="border rounded p-6 text-gray-500">No results yet. Upload submissions to see feedback here.</div>
   {/if}
-  <div class="flex justify-end mt-6">
-    <button class="bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 transition" on:click={clearHistory} disabled={history.length === 0}>Clear History</button>
-  </div>
+  {#if history.length > 0}
+    <div class="flex justify-end mt-6">
+      <button class="bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 transition" on:click={confirmClearHistory}>Clear History</button>
+    </div>
+  {/if}
   <AssessmentHistory {history} hideIfEmpty={true} on:delete={deleteEntry} />
 </section>
 
 <script lang="ts" context="module">
-export function clearHistory() {
-  localStorage.removeItem('assessmentHistory');
-  window.location.reload();
+export function confirmClearHistory() {
+  if (window.confirm('Are you sure you want to clear all assessment history? This action cannot be undone.')) {
+    localStorage.removeItem('assessmentHistory');
+    window.location.reload();
+  }
 }
 export function deleteEntry(event: CustomEvent) {
   const timestamp = event.detail;
-  let prev = [];
-  try {
-    prev = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
-  } catch {}
-
-  prev = prev.filter((entry: any) => entry.timestamp !== timestamp);
-  localStorage.setItem('assessmentHistory', JSON.stringify(prev));
-  window.location.reload();
+  if (window.confirm('Delete this assessment entry? This action cannot be undone.')) {
+    let prev = [];
+    try {
+      prev = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
+    } catch {}
+    prev = prev.filter((entry: any) => entry.timestamp !== timestamp);
+    localStorage.setItem('assessmentHistory', JSON.stringify(prev));
+    window.location.reload();
+  }
 }
 </script>
