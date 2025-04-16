@@ -100,7 +100,7 @@ async function handleSubmit(event: Event) {
 
 </script>
 
-<section class="max-w-xl mx-auto py-12">
+<section class="max-w-xl mx-auto py-12 relative">
   <h1 class="text-2xl font-bold mb-4">Upload Student Submissions</h1>
   <p class="mb-6">Upload student assignments for instant AI-powered assessment and feedback.</p>
   {#if errorMsg}
@@ -108,10 +108,19 @@ async function handleSubmit(event: Event) {
       <strong>Error:</strong> {errorMsg}
     </div>
   {/if}
+  {#if submitting}
+    <div class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 z-20">
+      <svg class="animate-spin h-10 w-10 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true" role="status">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
+      <span class="text-blue-700 font-semibold">Grading in progress...</span>
+    </div>
+  {/if}
   <form class="space-y-6" on:submit|preventDefault={handleSubmit}>
     <div class="mb-4">
       <label class="block mb-1 font-semibold" for="task">Task/Assignment Description <span class="text-red-500">*</span></label>
-      <textarea id="task" class="w-full border rounded p-2" rows="2" bind:value={taskDescription} required></textarea>
+      <textarea id="task" class="w-full border rounded p-2" rows="2" bind:value={taskDescription} required disabled={submitting}></textarea>
     </div>
     <div class="mb-4">
       <label class="block font-semibold mb-1" for="file">Upload a file (PDF, DOCX, TXT):</label>
