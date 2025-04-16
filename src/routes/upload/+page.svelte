@@ -54,8 +54,19 @@ async function handleSubmit(event: Event) {
     });
     const result = await response.json();
     if (response.ok && result.success) {
-      // Redirect to /results with feedback in history state
-      window.history.pushState({ feedback: result }, '', '/results');
+      // Save to localStorage history
+      try {
+        let prev = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
+        const entry = {
+          timestamp: Date.now(),
+          ...result,
+          submission: result.submission || textInput || '',
+          task: taskDescription,
+        };
+        prev.unshift(entry);
+        localStorage.setItem('assessmentHistory', JSON.stringify(prev.slice(0, 50)));
+      } catch {}
+      // Redirect to /results
       window.location.assign('/results');
       file = null;
       textInput = '';
