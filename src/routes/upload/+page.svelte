@@ -33,15 +33,33 @@ async function handleSubmit(event: Event) {
   successMsg = '';
   errorMsg = '';
 
-  // TODO - Actually do an upload, remove simulation of a successful upload
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  if (file || textInput.trim().length > 0) {
-    successMsg = 'Submission received! AI assessment coming soon.';
-  } else {
-    errorMsg = 'Please provide a file or enter text.';
+  const formData = new FormData();
+  if (file) {
+    formData.append('file', file);
+  } else if (textInput.trim().length > 0) {
+    formData.append('text', textInput.trim());
   }
-  submitting = false;
+
+  try {
+    const response = await fetch('/api/grade', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await response.json();
+    if (response.ok && result.success) {
+      successMsg = result.feedback;
+      file = null;
+      textInput = '';
+    } else {
+      errorMsg = result.error || 'An error occurred.';
+    }
+  } catch (err) {
+    errorMsg = 'Network or server error.';
+  } finally {
+    submitting = false;
+  }
 }
+
 </script>
 
 <section class="max-w-xl mx-auto py-12">
