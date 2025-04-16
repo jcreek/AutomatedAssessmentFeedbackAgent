@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+  const dispatch = createEventDispatcher();
   export let history: any[] = [];
   export let hideIfEmpty: boolean = false;
 </script>
@@ -18,6 +20,7 @@
             <th class="py-2 px-3 border-b text-left">Task/Assignment</th>
             <th class="py-2 px-3 border-b text-left">Grade</th>
             <th class="py-2 px-3 border-b text-left">Actions</th>
+            <th class="py-2 px-3 border-b text-left">Delete</th>
           </tr>
         </thead>
         <tbody>
@@ -42,6 +45,9 @@
                     </details>
                   </div>
                 </details>
+              </td>
+              <td class="py-1 px-3 text-center">
+                <button class="bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition text-xs" on:click={() => dispatch('delete', entry.timestamp)}>Delete</button>
               </td>
             </tr>
           {/each}
