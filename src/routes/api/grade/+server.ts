@@ -35,7 +35,7 @@ export const POST: RequestHandler = async (event: RequestEvent) => {
     return new Response(JSON.stringify({
       success: true,
       task: task.trim(),
-      feedback: `Grade: ${aiResult.grade}\nStrengths: ${aiResult.strengths}\nAreas for Improvement: ${aiResult.areas_for_improvement}\nIndividualized Activity: ${aiResult.individualized_activity}\nReasoning: ${aiResult.reasoning}`,
+      feedback: `Grade: ${aiResult.grade}\nStrengths: ${aiResult.strengths}\nAreas for Improvement: ${aiResult.areasForImprovement}\nIndividualized Activity: ${aiResult.individualizedActivity}\nSpelling and Grammar: ${aiResult.spellingAndGrammar}\nReasoning: ${aiResult.reasoning}`,
       ...aiResult
     }), {
       status: 200,

@@ -35,10 +35,11 @@
                   <div class="mt-2 p-2 bg-gray-50 rounded">
                     <div class="mb-1"><span class="font-semibold">Submission:</span> <span class="whitespace-pre-line">{entry.submission}</span></div>
                     <div class="mb-1"><span class="font-semibold">Strengths:</span> {entry.strengths}</div>
-                    <div class="mb-1"><span class="font-semibold">Areas for Improvement:</span> {entry.areas_for_improvement}</div>
-                    <div class="mb-1"><span class="font-semibold">Individualized Activity:</span> {entry.individualized_activity}</div>
-                    <div class="mb-1"><span class="font-semibold">Reflection Question:</span> {entry.reflection_question}</div>
-                    <div class="mb-1"><span class="font-semibold">Teacher Suggestion:</span> {entry.teacher_suggestion}</div>
+                    <div class="mb-1"><span class="font-semibold">Areas for Improvement:</span> {entry.areasForImprovement}</div>
+                    <div class="mb-1"><span class="font-semibold">Individualized Activity:</span> {entry.individualizedActivity}</div>
+                    <div class="mb-1"><span class="font-semibold">Reflection Question:</span> {entry.reflectionQuestion}</div>
+                    <div class="mb-1"><span class="font-semibold">Teacher Suggestion:</span> {entry.teacherSuggestion}</div>
+                    <div class="mb-1"><span class="font-semibold">Spelling and Grammar:</span> {entry.spellingAndGrammar}</div>
                     <details class="mt-2">
                       <summary class="cursor-pointer font-semibold text-gray-600" aria-label="Show AI reasoning for this assessment">Show AI Reasoning</summary>
                       <div class="mt-1 text-gray-700 whitespace-pre-line">{entry.reasoning}</div>

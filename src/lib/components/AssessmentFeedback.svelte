@@ -1,10 +1,11 @@
 <script lang="ts">
   export let grade: string = '';
   export let strengths: string = '';
-  export let areas_for_improvement: string = '';
-  export let individualized_activity: string = '';
-  export let reflection_question: string = '';
-  export let teacher_suggestion: string = '';
+  export let areasForImprovement: string = '';
+  export let individualizedActivity: string = '';
+  export let reflectionQuestion: string = '';
+  export let teacherSuggestion: string = '';
+  export let spellingAndGrammar: string = '';
   export let reasoning: string = '';
 </script>
 
@@ -12,10 +13,11 @@
   <h2 class="text-xl font-bold mb-4 text-blue-700">AI Assessment Feedback</h2>
   <div class="mb-2"><span class="font-semibold">Grade:</span> {grade}</div>
   <div class="mb-2"><span class="font-semibold">Strengths:</span> {strengths}</div>
-  <div class="mb-2"><span class="font-semibold">Areas for Improvement:</span> {areas_for_improvement}</div>
-  <div class="mb-2"><span class="font-semibold">Individualized Activity:</span> {individualized_activity}</div>
-  <div class="mb-2"><span class="font-semibold">Reflection Question:</span> {reflection_question}</div>
-  <div class="mb-2"><span class="font-semibold">Teacher Suggestion:</span> {teacher_suggestion}</div>
+  <div class="mb-2"><span class="font-semibold">Areas for Improvement:</span> {areasForImprovement}</div>
+  <div class="mb-2"><span class="font-semibold">Individualized Activity:</span> {individualizedActivity}</div>
+  <div class="mb-2"><span class="font-semibold">Reflection Question:</span> {reflectionQuestion}</div>
+  <div class="mb-2"><span class="font-semibold">Teacher Suggestion:</span> {teacherSuggestion}</div>
+  <div class="mb-2"><span class="font-semibold">Spelling and Grammar:</span> {spellingAndGrammar}</div>
   <details class="mt-4">
     <summary class="cursor-pointer font-semibold text-gray-600">Show AI Reasoning</summary>
     <div class="mt-2 text-gray-700 whitespace-pre-line">{reasoning}</div>

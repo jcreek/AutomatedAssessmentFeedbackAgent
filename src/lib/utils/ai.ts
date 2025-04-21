@@ -1,6 +1,7 @@
 import { client, agent } from '../agent/services/agentService';
 import type { MessageTextContentOutput, ToolOutput } from '@azure/ai-projects';
 import { PARTYKIT_BASE_URL } from '$env/static/private';
+import type { OpenAIResponse } from './types';
 
 // Prompt template for grading and feedback
 export function buildGradingPrompt(submission: string, task: string) {
@@ -27,12 +28,13 @@ Follow these steps:
 RESPONSE FORMAT (respond with a single JSON object, no extra text):
 
 {
-  "grade": "<number or string, e.g. 8/10 or 8>",
+  "grade": "<number or string, e.g. A, B, C+, etc>",
   "strengths": "<text>",
-  "areas_for_improvement": "<text>",
-  "individualized_activity": "<text>",
-  "reflection_question": "<text>",
-  "teacher_suggestion": "<text>",
+  "areasForImprovement": "<text>",
+  "individualizedActivity": "<text>",
+  "reflectionQuestion": "<text>",
+  "teacherSuggestion": "<text>",
+  "spellingAndGrammar": "<text>",
   "reasoning": "<step-by-step explanation>"
 }
 
@@ -40,25 +42,16 @@ Respond ONLY with the JSON object, with no preamble or explanation.
 `;
 }
 
-export type OpenAIResponse = {
-  grade: string;
-  strengths: string;
-  areas_for_improvement: string;
-  individualized_activity: string;
-  reflection_question: string;
-  teacher_suggestion: string;
-  reasoning: string;
-};
-
 function fallbackGrade(submission: string, task: string): OpenAIResponse {
   console.log('using fallback');
   return {
     grade: '7/10',
     strengths: 'Clear argument and good evidence (in response to the task: ' + task + ").",
-    areas_for_improvement: 'Needs deeper analysis and more examples.',
-    individualized_activity: 'Write a paragraph expanding on your main point and provide two additional examples to support your argument.',
-    reflection_question: 'What was the most challenging part of this assignment for you, and why?',
-    teacher_suggestion: 'In the next lesson, review how to develop arguments with supporting evidence and provide a model answer for comparison.',
+    areasForImprovement: 'Needs deeper analysis and more examples.',
+    individualizedActivity: 'Write a paragraph expanding on your main point and provide two additional examples to support your argument.',
+    reflectionQuestion: 'What was the most challenging part of this assignment for you, and why?',
+    teacherSuggestion: 'In the next lesson, review how to develop arguments with supporting evidence and provide a model answer for comparison.',
+    spellingAndGrammar: 'Everything was spelled correctly',
     reasoning: 'The submission demonstrates a good structure and evidence, but lacks depth and breadth of analysis. The activity and suggestions are designed to target this gap.'
   };
 }
@@ -189,10 +182,11 @@ export async function gradeSubmissionWithAgent(submission: string, task: string,
     return {
       grade: '',
       strengths: '',
-      areas_for_improvement: '',
-      individualized_activity: '',
-      reflection_question: '',
-      teacher_suggestion: '',
+      areasForImprovement: '',
+      individualizedActivity: '',
+      reflectionQuestion: '',
+      teacherSuggestion: '',
+      spellingAndGrammar: '',
       reasoning: text || 'No feedback generated.'
     };
   } catch (err) {
