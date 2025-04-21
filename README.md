@@ -97,6 +97,55 @@ pnpm run build
 You can preview the production build with `npm run preview`.
 
 
+## 🕹️ Real-Time Events: PartyKit Setup
+
+This project uses [PartyKit](https://partykit.io/) for real-time tool usage event streaming between the frontend and backend.
+
+### Running PartyKit Locally
+
+1. **Install dependencies** for PartyKit:
+   ```sh
+   cd partykit
+   npm install
+   ```
+2. **Set up your `.env` file** (in the project root):
+   ```env
+   VITE_PARTYKIT_BASE_URL=ws://127.0.0.1:1999
+   PARTYKIT_BASE_URL=ws://127.0.0.1:1999
+   ```
+   These variables are required for both the SvelteKit frontend and backend to connect to your local PartyKit server.
+3. **Start the PartyKit dev server**:
+   ```sh
+   cd partykit
+   npm run dev
+   ```
+   The server will be available at `ws://127.0.0.1:1999/party/<room>`.
+4. **Start the SvelteKit frontend** (in a separate terminal):
+   ```sh
+   pnpm run dev
+   ```
+
+### Deploying PartyKit to Production
+
+1. **Update your `.env` for production**:
+   ```env
+   VITE_PARTYKIT_BASE_URL=wss://<your-connection-string>.partykit.dev
+   PARTYKIT_BASE_URL=wss://<your-connection-string>.partykit.dev
+   ```
+2. **Deploy PartyKit**:
+   ```sh
+   cd partykit
+   npm run deploy
+   ```
+   Wait for the domain provisioning to complete.
+3. **Update your frontend/backend to use the production WebSocket URL** (as above).
+
+### Troubleshooting
+- If you see `Invalid URL` errors, make sure your environment variables are set and that you have restarted your dev servers after editing `.env`.
+- Always run the PartyKit dev server from the `partykit` directory.
+
+See also `.env.example` for sample configuration.
+
 ## 📚 Resources
 - [Hack Together: AI Agents Hackathon – Introduction & Getting Started](https://www.youtube.com/watch?v=RNphlRKvmJQ)
 - [Hack Together: AI Agents Hackathon – Building Your Agent](https://www.youtube.com/watch?v=Aq30zfbWNSQ)

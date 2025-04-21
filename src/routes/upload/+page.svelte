@@ -7,6 +7,10 @@ let taskDescription = '';
 let submitting = false;
 let successMsg = '';
 let errorMsg = '';
+let toolEvents: Array<{ tool: string, time: string }> = [];
+let roomId: string = '';
+let ws: WebSocket | null = null;
+const PARTYKIT_BASE_URL = import.meta.env.VITE_PARTYKIT_BASE_URL;
 
 function handleFileChange(event: Event) {
   const target = event.target as HTMLInputElement;
@@ -33,6 +37,19 @@ async function handleSubmit(event: Event) {
   submitting = true;
   successMsg = '';
   errorMsg = '';
+  toolEvents = [];
+
+  // Generate a unique roomId for this submission
+  roomId = crypto.randomUUID();
+  // Connect to PartyKit for this session
+  if (ws) ws.close();
+  ws = new WebSocket(`${PARTYKIT_BASE_URL}/party/tool-usage-server-${roomId}`);
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      toolEvents = [...toolEvents, data];
+    } catch {}
+  };
 
   if (!taskDescription.trim()) {
     errorMsg = 'Please provide a description of the task or assignment.';
@@ -46,6 +63,7 @@ async function handleSubmit(event: Event) {
   } else if (textInput.trim().length > 0) {
     formData.append('text', textInput.trim());
   }
+  formData.append('roomId', roomId);
 
   errorMsg = '';
   try {
@@ -109,13 +127,21 @@ async function handleSubmit(event: Event) {
     </div>
   {/if}
   {#if submitting}
-    <div class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 z-20" role="status" aria-busy="true" aria-live="polite" tabindex="-1">
+    <div id="submitting-container" class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 z-20" role="status" aria-busy="true" aria-live="polite" tabindex="-1">
       <svg class="animate-spin h-10 w-10 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
       </svg>
       <span class="sr-only">Loading...</span>
       <span class="text-blue-700 font-semibold">Grading in progress...</span>
+      <div class="mt-4 w-full max-w-md">
+        {#each toolEvents as event, i}
+          <div class="flex items-center space-x-2 text-sm text-gray-700 bg-blue-50 rounded p-2 my-1">
+            <span>🛠️ {event.tool}</span>
+            <span class="text-xs text-gray-400">{new Date(event.time).toLocaleTimeString()}</span>
+          </div>
+        {/each}
+      </div>
     </div>
   {/if}
   <form class="space-y-6" on:submit|preventDefault={handleSubmit}>

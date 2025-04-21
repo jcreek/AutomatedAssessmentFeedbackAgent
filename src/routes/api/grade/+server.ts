@@ -8,6 +8,7 @@ export const POST: RequestHandler = async (event: RequestEvent) => {
     const file = data.get('file');
     const text = data.get('text');
     const task = data.get('task');
+    const roomId = data.get('roomId') as string | undefined;
     let submission = '';
 
     if (!task || typeof task !== 'string' || !task.trim()) {
@@ -29,7 +30,7 @@ export const POST: RequestHandler = async (event: RequestEvent) => {
     }
 
     // Call the AI grading agent with threading and fallback
-    const aiResult = await gradeSubmissionWithAgent(submission, task.trim());
+    const aiResult = await gradeSubmissionWithAgent(submission, task.trim(), roomId);
 
     return new Response(JSON.stringify({
       success: true,

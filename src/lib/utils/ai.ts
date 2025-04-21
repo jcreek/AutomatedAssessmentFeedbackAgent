@@ -1,9 +1,6 @@
 import { client, agent } from '../agent/services/agentService';
 import type { MessageTextContentOutput, ToolOutput } from '@azure/ai-projects';
-
-const OPENAI_API_KEY = process.env['AZURE_OPENAI_API_KEY'];
-const OPENAI_ENDPOINT = process.env['AZURE_OPENAI_ENDPOINT'];
-const OPENAI_DEPLOYMENT = process.env['AZURE_OPENAI_DEPLOYMENT'] || 'gpt-4';
+import { PARTYKIT_BASE_URL } from '$env/static/private';
 
 // Prompt template for grading and feedback
 export function buildGradingPrompt(submission: string, task: string) {
@@ -66,7 +63,7 @@ function fallbackGrade(submission: string, task: string): OpenAIResponse {
   };
 }
 
-export async function gradeSubmissionWithAgent(submission: string, task: string): Promise<OpenAIResponse> {
+export async function gradeSubmissionWithAgent(submission: string, task: string, roomId?: string): Promise<OpenAIResponse> {
   try {
     if (!client || !agent) throw new Error('Agent not available');
 
@@ -110,6 +107,24 @@ export async function gradeSubmissionWithAgent(submission: string, task: string)
         const toolOutputs: ToolOutput[] = await Promise.all(toolCalls.map(async (call: any) => {
           let output = '';
           const args = JSON.parse(call.function.arguments);
+
+          if (roomId) {
+            try {
+              const ws = new (typeof WebSocket !== 'undefined' ? WebSocket : (await import('ws')).default)(`${PARTYKIT_BASE_URL}/party/tool-usage-server-${roomId}`);
+
+              // Wait for connection to open
+              await new Promise<void>((resolve, reject) => {
+                ws.onopen = () => resolve();
+                ws.onerror = (err) => reject(err);
+              });
+
+              ws.send(JSON.stringify({ tool: call.function.name, time: new Date().toISOString() }));
+              
+              ws.close();
+            } catch (err) {
+              console.error('Failed to send tool usage event to PartyKit:', err);
+            }
+          }
 
           if (
             call.function.name === 'matchRubric' ||
