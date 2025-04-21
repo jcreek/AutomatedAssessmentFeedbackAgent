@@ -1,7 +1,13 @@
 import { ToolUtility } from '@azure/ai-projects';
 
+export const spellingAndGrammarCheckerToolMeta = {
+  key: 'checkSpellingAndGrammar',
+  userDescription: 'Checking for spelling and grammar mistakes',
+  icon: '📝',
+};
+
 export const spellingAndGrammarCheckerTool = ToolUtility.createFunctionTool({
-    name: 'checkSpellingAndGrammar',
+    name: spellingAndGrammarCheckerToolMeta.key,
     description: 'Identifies spelling, punctuation, and syntax issues in the submission and suggests corrections.',
     parameters: {
       type: 'object',

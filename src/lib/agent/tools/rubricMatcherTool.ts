@@ -1,7 +1,13 @@
 import { ToolUtility } from '@azure/ai-projects';
 
+export const rubricMatcherToolMeta = {
+  key: 'matchRubric',
+  userDescription: 'Assessing the submission against the provided rubric',
+  icon: '📊',
+};
+
 export const rubricMatcherTool = ToolUtility.createFunctionTool({
-  name: 'matchRubric',
+  name: rubricMatcherToolMeta.key,
   description: 'Matches a submission to a rubric and returns a score/criteria breakdown.',
   parameters: {
     type: 'object',
