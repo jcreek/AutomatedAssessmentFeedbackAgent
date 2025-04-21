@@ -92,8 +92,10 @@
 					prev.unshift(entry);
 					localStorage.setItem('assessmentHistory', JSON.stringify(prev.slice(0, 50)));
 				} catch {}
+
 				// Redirect to /results
 				window.location.assign('/results');
+
 				file = null;
 				textInput = '';
 				taskDescription = '';
@@ -112,14 +114,13 @@
 		} catch (err) {
 			errorMsg = 'Network or server error. Please check your connection and try again.';
 		} finally {
-			submitting = false;
+      // Disabled to make the transition to the results page smoother
+			// submitting = false;
 		}
 	}
 </script>
 
-<section class="relative mx-auto max-w-xl py-12">
-	<h1 class="mb-4 text-2xl font-bold">Upload Student Submissions</h1>
-	<p class="mb-6">Upload student assignments for instant AI-powered assessment and feedback.</p>
+<section class="relative mx-auto max-w-4xl py-12">
 	{#if errorMsg}
 		<div
 			class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-red-700"
@@ -133,6 +134,8 @@
 	{#if submitting}
 		<AgenticProgress {toolEvents} />
 	{:else}
+		<h1 class="mb-4 text-2xl font-bold">Upload Student Submissions</h1>
+		<p class="mb-6">Upload student assignments for instant AI-powered assessment and feedback.</p>
 		<form class="space-y-6" on:submit|preventDefault={handleSubmit}>
 			<div class="mb-4">
 				<label class="mb-1 block font-semibold" for="task"

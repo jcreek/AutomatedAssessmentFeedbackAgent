@@ -50,6 +50,10 @@
     flex-direction: column;
     align-items: center;
     margin-top: 2rem;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
   }
   .agent-avatar {
     font-size: 3rem;
@@ -75,31 +79,99 @@
     background: linear-gradient(90deg, #5b9df9 0%, #4ade80 100%);
     transition: width 0.5s;
   }
-  ul.steps {
-    list-style: none;
+  ul.tool-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 2rem;
     padding: 0;
+    list-style: none;
     width: 100%;
-    max-width: 400px;
   }
-  li.step {
+  li.tool-step-card {
     display: flex;
     align-items: center;
-    padding: 0.75rem 0.5rem;
-    border-radius: 6px;
-    margin-bottom: 0.5rem;
-    background: #f8fafc;
-    font-size: 1.05rem;
+    background: #f3f6fa;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px 0 rgba(44, 62, 80, 0.09);
+    padding: 0.5rem;
+    gap: 1.5rem;
+    transition: box-shadow 0.2s, border 0.2s;
     outline: none;
+    border: 2px solid #e0e7ef;
+    min-height: 3.6rem;
+    width: 100%;
+    box-sizing: border-box;
   }
-  li.step[aria-current="step"] {
+  .tool-step-icon {
+    margin-right: 1.25rem;
+    font-size: 2rem;
+    min-width: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tool-step-desc {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #22223b;
+    flex: 1 1 auto;
+    margin-right: 2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tool-step-time {
+    font-size: 0.97rem;
+    color: #64748b;
+    margin-right: 1.5rem;
+    min-width: 4.2rem;
+    text-align: right;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .tool-step-status {
+    font-size: 1.45rem;
+    margin-left: 0.5rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
     background: #e0f2fe;
+    color: #2563eb;
     font-weight: bold;
+    box-shadow: 0 1px 3px 0 rgba(44, 62, 80, 0.07);
+    flex-shrink: 0;
   }
-  .step-icon {
+  .tool-step-card:focus {
+    border: 2px solid #60a5fa;
+    box-shadow: 0 0 0 3px #bae6fd;
+  }
+  .tool-step-card.running {
+    border-color: #60a5fa;
+    background: #e8f1fb;
+  }
+  .tool-step-card.done {
+    border-color: #22c55e;
+  }
+  .tool-step-icon {
     margin-right: 1rem;
     font-size: 1.5rem;
     min-width: 2rem;
     text-align: center;
+  }
+  .tool-step-desc {
+    font-size: 1.05rem;
+  }
+  .tool-step-time {
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  .tool-step-status {
+    margin-left: auto;
+    font-size: 1.2rem;
   }
   .visually-hidden {
     position: absolute;
@@ -120,26 +192,27 @@
     ></div>
   </div>
   <div aria-live="polite" class="visually-hidden">{liveMessage}</div>
-  <ul class="steps" aria-label="Processing steps">
-    {#if agentThinking}
-      <li class="step" aria-current="step">
-        <span class="step-icon" aria-hidden="true">💡</span>
-        <span>AI Agent is analyzing your submission…</span>
+  <ul class="tool-steps" aria-label="Processing steps">
+  {#if agentThinking}
+    <li class="tool-step-card" aria-current="step" tabindex="0">
+      <span class="tool-step-icon" aria-hidden="true">💡</span>
+      <span class="tool-step-desc">The AI Agent is analyzing your submission…</span>
+    </li>
+  {:else}
+    {#each steps as step, idx}
+      <li class="tool-step-card {step.status}" tabindex="0" aria-current={step.status === 'running' ? 'step' : undefined}>
+        <span class="tool-step-icon" aria-hidden="true">{step.icon}</span>
+        <span class="tool-step-desc">{step.description}</span>
+        <span class="tool-step-time">{new Date(step.time).toLocaleTimeString()}</span>
+        <span class="tool-step-status" aria-label={step.status === 'done' ? 'Completed' : step.status === 'running' ? 'In progress' : 'Pending'}>
+          {step.status === 'done'
+            ? '✅'
+            : step.status === 'running'
+              ? '⏳'
+              : '🛠️'}
+        </span>
       </li>
-    {:else}
-      {#each steps as step, idx}
-        <li class="step {step.status}">
-          <span class="step-icon" aria-hidden="true">{step.icon}</span>
-          <span class="step-desc">{step.description}</span>
-          <span class="step-time">{new Date(step.time).toLocaleTimeString()}
-            {step.status === 'done'
-              ? '✅'
-              : step.status === 'running'
-                ? '⏳'
-                : '🛠️'}
-          </span>
-        </li>
-      {/each}
-    {/if}
-  </ul>
+    {/each}
+  {/if}
+</ul>
 </div>
