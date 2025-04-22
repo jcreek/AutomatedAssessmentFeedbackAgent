@@ -23,7 +23,16 @@
   };
 
   // Build steps from toolEvents, filling in status, icon, and userDescription
+  $: agentThinking = toolEvents.length === 0;
   $: steps = toolEvents.map((event, idx) => {
+    if (event.tool === 'thinking') {
+      return {
+        description: 'The AI Agent is analyzing your submission…',
+        icon: '💡',
+        status: toolEvents.length === 1 ? 'running' : 'done',
+        time: event.time
+      };
+    }
     const meta = TOOL_META_MAP[event.tool];
     return {
       description: meta ? meta.userDescription : event.tool,
@@ -32,16 +41,12 @@
       time: event.time
     };
   });
-  // If no events yet, show agent 'thinking'
-  $: agentThinking = toolEvents.length === 0;
   $: statusMessage = agentThinking
     ? 'The AI Agent is analyzing your submission and selecting the best tools...'
     : 'The AI Agent is now processing your submission...';
-  $: liveMessage = agentThinking
-    ? statusMessage
-    : steps.length > 0
-      ? steps[steps.length - 1].description
-      : statusMessage;
+  $: liveMessage = steps.length > 0
+    ? steps[steps.length - 1].description
+    : statusMessage;
 </script>
 
 <style>
@@ -193,12 +198,6 @@
   </div>
   <div aria-live="polite" class="visually-hidden">{liveMessage}</div>
   <ul class="tool-steps" aria-label="Processing steps">
-  {#if agentThinking}
-    <li class="tool-step-card" aria-current="step" tabindex="0">
-      <span class="tool-step-icon" aria-hidden="true">💡</span>
-      <span class="tool-step-desc">The AI Agent is analyzing your submission…</span>
-    </li>
-  {:else}
     {#each steps as step, idx}
       <li class="tool-step-card {step.status}" tabindex="0" aria-current={step.status === 'running' ? 'step' : undefined}>
         <span class="tool-step-icon" aria-hidden="true">{step.icon}</span>
@@ -213,6 +212,5 @@
         </span>
       </li>
     {/each}
-  {/if}
-</ul>
+  </ul>
 </div>

@@ -37,7 +37,13 @@
 		submitting = true;
 		successMsg = '';
 		errorMsg = '';
-		toolEvents = [];
+		const THINKING_EVENT = { tool: 'thinking', time: new Date().toISOString() };
+		function ensureThinkingStep(events) {
+			// Remove any existing 'thinking' event
+			const filtered = events.filter(e => e.tool !== 'thinking');
+			return [THINKING_EVENT, ...filtered];
+		}
+		toolEvents = [THINKING_EVENT];
 
 		// Generate a unique roomId for this submission
 		roomId = crypto.randomUUID();
@@ -47,7 +53,7 @@
 		ws.onmessage = (event) => {
 			try {
 				const data = JSON.parse(event.data);
-				toolEvents = [...toolEvents, data];
+				toolEvents = ensureThinkingStep([...toolEvents, data]);
 			} catch {}
 		};
 
