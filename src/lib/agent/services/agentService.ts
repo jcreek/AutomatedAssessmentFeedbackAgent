@@ -23,10 +23,10 @@ export const client = AIProjectsClient.fromConnectionString(
   new DefaultAzureCredential()
 );
 
-const codeInterpreterTool = ToolUtility.createCodeInterpreterTool([]);
+// const codeInterpreterTool = ToolUtility.createCodeInterpreterTool([]);
 
 const allTools = [
-  codeInterpreterTool,
+  // codeInterpreterTool,
   rubricMatcherTool,
   essayAnalyzerTool,
   conceptVerifierTool,
@@ -51,12 +51,18 @@ Whenever you need to:
  • check spelling & grammar → call "${spellingAndGrammarCheckerTool.definition.name}"  
 `;
 
-const toolResources = allTools.reduce<Record<string, any>>((map, t) => {
-  if (typeof t === 'function') {
-    map[t.definition.name] = t;
-  } else {
-    map[t.definition.name] = t.resources;
+export const toolResources = allTools.reduce<Record<string, any>>((map, t) => {
+  // Try all plausible locations for the tool name
+  const name =
+    t.definition.name ||
+    t.definition.function?.name ||
+    Object.keys(t.resources ?? {})[0];
+
+  if (!name) {
+    console.warn('Tool missing name:', t);
+    return map;
   }
+  map[name] = t;
   return map;
 }, {});
 
