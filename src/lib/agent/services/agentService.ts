@@ -1,69 +1,72 @@
 import { DefaultAzureCredential } from '@azure/identity';
-import { AIProjectsClient } from '@azure/ai-projects';
-import { ToolUtility } from '@azure/ai-projects';
+import { AIProjectsClient, ToolUtility } from '@azure/ai-projects';
+import {
+  rubricMatcherTool,
+  essayAnalyzerTool,
+  conceptVerifierTool,
+  feedbackGeneratorTool,
+  metacognitiveReflectionPromptTool,
+  selfAssessmentTool,
+  spellingAndGrammarCheckerTool
+} from '../tools/index';
 import { AI_FOUNDRY_PROJECT_CONNECTION_STRING, AI_MODEL } from '$env/static/private';
 
-import { 
-  rubricMatcherTool, 
-  essayAnalyzerTool, 
-  conceptVerifierTool, 
-  feedbackGeneratorTool, 
-  metacognitiveReflectionPromptTool, 
-  selfAssessmentTool, 
-  spellingAndGrammarCheckerTool 
-} from '../tools/index';
-
-const connectionString = AI_FOUNDRY_PROJECT_CONNECTION_STRING;
-if (!connectionString) {
-  throw new Error('AI_FOUNDRY_PROJECT_CONNECTION_STRING is not set in environment variables');
+if (!AI_FOUNDRY_PROJECT_CONNECTION_STRING) {
+  throw new Error('AI_FOUNDRY_PROJECT_CONNECTION_STRING is not set');
+}
+if (!AI_MODEL) {
+  throw new Error('AI_MODEL is not set');
 }
 
-const aiModel = AI_MODEL || '';
-if (!connectionString) {
-  throw new Error('AI_MODEL is not set in environment variables');
-}
-
-const client = AIProjectsClient.fromConnectionString(
-  connectionString,
+export const client = AIProjectsClient.fromConnectionString(
+  AI_FOUNDRY_PROJECT_CONNECTION_STRING,
   new DefaultAzureCredential()
 );
 
 const codeInterpreterTool = ToolUtility.createCodeInterpreterTool([]);
 
-const tools = [
-  codeInterpreterTool.definition,
-  rubricMatcherTool.definition,
-  essayAnalyzerTool.definition,
-  conceptVerifierTool.definition,
-  feedbackGeneratorTool.definition,
-  metacognitiveReflectionPromptTool.definition,
-  selfAssessmentTool.definition,
-  spellingAndGrammarCheckerTool.definition
+const allTools = [
+  codeInterpreterTool,
+  rubricMatcherTool,
+  essayAnalyzerTool,
+  conceptVerifierTool,
+  feedbackGeneratorTool,
+  metacognitiveReflectionPromptTool,
+  selfAssessmentTool,
+  spellingAndGrammarCheckerTool
 ];
 
-const instructions = "You are a helpful agent that can assist with providing feedback on a student's work for a teacher. You are familiar with all modern pedagogy around summative and formative assessment, and K12 education, and primary and secondary education.";
+const tools = allTools.map(t => t.definition);
 
-const toolResources = {
-  ...codeInterpreterTool.resources,
-  matchRubric: {},
-  analyzeEssay: {},
-  conceptVerifier: {},
-  feedbackGenerator: {},
-  metacognitiveReflectionPrompt: {},
-  selfAssessment: {},
-  spellingAndGrammarChecker: {}
-};
+const instructions = `
+You are a helpful agent that can assist with providing feedback on a student's work for a teacher.
+You are familiar with modern pedagogy around summative and formative assessment in K-12 education.
+Whenever you need to:
+ • check the submission against the rubric → call "${rubricMatcherTool.definition.name}"  
+ • verify which rubric concepts appear or are missing → call "${conceptVerifierTool.definition.name}"  
+ • analyze essay structure → call "${essayAnalyzerTool.definition.name}"  
+ • generate targeted feedback → call "${feedbackGeneratorTool.definition.name}"  
+ • craft a metacognitive prompt → call "${metacognitiveReflectionPromptTool.definition.name}"  
+ • guide self-assessment → call "${selfAssessmentTool.definition.name}"  
+ • check spelling & grammar → call "${spellingAndGrammarCheckerTool.definition.name}"  
+`;
 
-const agent = await client.agents.createAgent(aiModel, {
+const toolResources = allTools.reduce<Record<string, any>>((map, t) => {
+  if (typeof t === 'function') {
+    map[t.definition.name] = t;
+  } else {
+    map[t.definition.name] = t.resources;
+  }
+  return map;
+}, {});
+
+export const agent = await client.agents.createAgent(AI_MODEL, {
   name: `assessment-feedback-agent`,
   instructions,
   temperature: 0.5,
   tools,
   toolResources,
-
   requestOptions: {
-    headers: { "x-ms-enable-preview": "true" },
-  },
+    headers: { 'x-ms-enable-preview': 'true' }
+  }
 });
-
-export { client, agent };

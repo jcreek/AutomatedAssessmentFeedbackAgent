@@ -8,7 +8,7 @@ export const spellingAndGrammarCheckerToolMeta = {
 
 export const spellingAndGrammarCheckerTool = ToolUtility.createFunctionTool({
     name: spellingAndGrammarCheckerToolMeta.key,
-    description: 'Identifies spelling, punctuation, and syntax issues in the submission and suggests corrections.',
+    description: 'Identifies spelling, punctuation, and syntax issues in the submission and suggests corrections. This should result in a clear set of pairs, e.g. "shud" - "should"',
     parameters: {
       type: 'object',
       properties: {
