@@ -146,6 +146,52 @@ This project uses [PartyKit](https://partykit.io/) for real-time tool usage even
 
 See also `.env.example` for sample configuration.
 
+## 🧪 Running BDD Tests (Cucumber + Playwright)
+
+This project includes end-to-end BDD (Behavior-Driven Development) tests using [Cucumber.js](https://github.com/cucumber/cucumber-js) and [Playwright](https://playwright.dev/).
+
+### Prerequisites
+- All application dependencies installed (see above)
+- [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/)
+
+### Install Playwright Browsers
+If you haven't already, install Playwright's required browsers:
+
+```bash
+pnpm exec playwright install
+```
+
+### Running the Tests
+1. Start the SvelteKit dev server:
+   ```bash
+   pnpm run dev
+   ```
+   (Or use `pnpm run bdd:full` to auto-start the server and run tests.)
+
+2. In a separate terminal, run the BDD tests:
+   ```bash
+   pnpm run test:bdd
+   ```
+   This will execute all feature files in `tests/bdd/features/` using step definitions in `tests/bdd/steps/`.
+
+### Test Output & Screenshots
+- Test results will be shown in the terminal.
+- On failure, a screenshot will be saved to the `screenshots/` directory in the project root (see `tests/bdd/support/hooks.ts`).
+- Screenshot filenames are based on the scenario name.
+
+### Customizing/Debugging
+- You can run a specific feature file:
+  ```bash
+  pnpm run test:bdd -- tests/bdd/features/assessment_submission.feature
+  ```
+- For more verbose output, add `--format progress` or `--format summary`.
+
+### Project Scripts
+- `pnpm run test:bdd` – Run all BDD tests
+- `pnpm run bdd:full` – Start dev server and run all BDD tests (requires [start-server-and-test](https://github.com/jsdom/start-server-and-test))
+
+For more information, see the `package.json` scripts section.
+
 ## 📚 Resources
 - [Hack Together: AI Agents Hackathon – Introduction & Getting Started](https://www.youtube.com/watch?v=RNphlRKvmJQ)
 - [Hack Together: AI Agents Hackathon – Building Your Agent](https://www.youtube.com/watch?v=Aq30zfbWNSQ)

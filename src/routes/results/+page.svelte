@@ -33,7 +33,7 @@ onMount(() => {
 <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-blue-100 text-blue-700 px-2 py-1 rounded">Skip to main content</a>
 <section id="main-content" class="max-w-4xl mx-auto py-12">
   <div class="flex justify-between items-center mb-4">
-    <h1 class="text-2xl font-bold">Assessment Results</h1>
+    <h1 class="text-2xl font-bold" data-testid="results-heading">Assessment Results</h1>
     <a href="/upload" class="bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition" aria-label="Back to upload page">Back to Upload</a>
   </div>
   <p class="mb-6">View detailed feedback and recommendations for each student submission.</p>

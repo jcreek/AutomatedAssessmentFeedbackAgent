@@ -64,6 +64,7 @@
 		}
 		const formData = new FormData();
 		formData.append('task', taskDescription.trim());
+		
 		if (file) {
 			formData.append('file', file);
 		} else if (textInput.trim().length > 0) {
@@ -143,6 +144,7 @@
 		<h1 class="mb-4 text-2xl font-bold">Upload Student Submissions</h1>
 		<p class="mb-6">Upload student assignments for instant AI-powered assessment and feedback.</p>
 		<form class="space-y-6" on:submit|preventDefault={handleSubmit}>
+
 			<div class="mb-4">
 				<label class="mb-1 block font-semibold" for="task"
 					>Task/Assignment Description <span class="text-red-500">*</span></label
@@ -156,6 +158,7 @@
 					aria-required="true"
 					aria-label="Task or Assignment Description"
 					disabled={submitting}
+					data-testid="task-input"
 				></textarea>
 			</div>
 			<div class="mb-4">
@@ -180,12 +183,14 @@
 					on:input={handleTextChange}
 					disabled={submitting}
 					placeholder="Paste or type student answer here..."
+					data-testid="submission-input"
 				></textarea>
 			</div>
 			<button
 				type="submit"
 				class="mt-4 w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
 				disabled={submitting || (!file && textInput.trim().length === 0)}
+				data-testid="submit-button"
 			>
 				{submitting ? 'Uploading...' : 'Submit'}
 			</button>

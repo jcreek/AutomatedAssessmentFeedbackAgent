@@ -9,7 +9,7 @@
   export let reasoning: string = '';
 </script>
 
-<section class="max-w-4xl mx-auto bg-white rounded shadow p-6 mt-8">
+<section class="max-w-4xl mx-auto bg-white rounded shadow p-6 mt-8" data-testid="feedback">
   <h2 class="text-xl font-bold mb-4 text-blue-700">AI Assessment Feedback</h2>
   <div class="mb-2"><span class="font-semibold">Grade:</span> {grade}</div>
   <div class="mb-2"><span class="font-semibold">Strengths:</span> {strengths}</div>
