@@ -1,6 +1,6 @@
 # AI-Powered Automated Assessment and Feedback Agent
 
-![Test Status](https://github.com/jcreek/AutomatedAssessmentFeedbackAgent/actions/workflows/ci.yml/badge.svg?branch=main)
+![BDD Tests](https://github.com/jcreek/AutomatedAssessmentFeedbackAgent/actions/workflows/ci.yml/badge.svg?branch=main)
 
 > An intelligent, agentic AI system designed to significantly reduce teachers' workloads by providing instant assessment and personalized differentiated feedback and follow-on activities for student assignments.
 
