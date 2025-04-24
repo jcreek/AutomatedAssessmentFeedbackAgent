@@ -167,14 +167,14 @@
 					id="file"
 					type="file"
 					accept=".pdf,.doc,.docx,.txt"
-					class="block w-full rounded border p-2"
+					class="block w-full rounded border p-2 bg-gray-100 cursor-not-allowed"
 					on:change={handleFileChange}
-					disabled={submitting}
+					disabled
 				/>
-				<span class="text-sm text-gray-500">Or paste the student's submission below.</span>
+				<span class="text-sm text-red-600">File upload is disabled for this hackathon demo.</span>
 			</div>
 			<div class="mb-4">
-				<label class="mb-1 block font-semibold" for="textInput">Paste assignment text:</label>
+				<label class="mb-1 block font-semibold" for="textInput">Paste assignment text: <span class="text-red-500">*</span></label>
 				<textarea
 					id="textInput"
 					rows="5"
