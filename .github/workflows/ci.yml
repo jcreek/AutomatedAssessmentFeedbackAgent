@@ -16,6 +16,6 @@ jobs:
         with:
           node-version: '20'
       - name: Install dependencies
-        run: npm ci
+        run: pnpm exec playwright install && pnpm i
       - name: Run Playwright/BDD tests
         run: npm run bdd:full
