@@ -1,8 +1,9 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
+import { ResultsPage } from '../pages/ResultsPage.ts';
 
 Given('I am viewing the assessment history', async function () {
-  await this.page.goto('http://localhost:5173/results');
+  await this.resultsPage.navigateTo();
   await this.page.waitForSelector('table[aria-label="Assessment history table"]');
 });
 
@@ -18,13 +19,11 @@ Given('I have previously submitted assessments', async function () {
       submission: 'Dog',
     }
   ]) {
-    await this.page.goto('http://localhost:5173/upload');
-    await this.page.fill('[data-testid="task-input"]', assessment.task);
-    await this.page.fill('[data-testid="submission-input"]', assessment.submission);
-    await Promise.all([
-      this.page.waitForNavigation({ url: '**/results' }),
-      this.page.click('[data-testid="submit-button"]')
-    ]);
+    await this.uploadPage.navigateTo();
+    await this.uploadPage.setTaskDescription(assessment.task);
+    await this.uploadPage.setSubmissionText(assessment.submission);
+    await this.uploadPage.submit();
+    await this.resultsPage.waitForHeadingVisible();
   }
 });
 
@@ -66,7 +65,7 @@ Then('that assessment should be removed from the history', async function () {
 When('I clear all assessment history', async function () {
   await Promise.all([
     this.page.waitForEvent('dialog').then(dialog => dialog.accept()),
-    this.page.click('button[aria-label="Clear all assessment history"]')
+    this.resultsPage.clearHistory()
   ]);
 });
 

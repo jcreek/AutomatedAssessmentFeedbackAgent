@@ -1,69 +1,72 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-
-async function getFeedbackText(page: any) {
-  await page.waitForSelector('[data-testid="feedback"]', { state: 'visible' });
-  return page.textContent('[data-testid="feedback"]');
-}
+import { UploadPage } from '../pages/UploadPage.ts';
+import { ResultsPage } from '../pages/ResultsPage.ts';
 
 Given('I am on the "Upload Student Submissions" page', async function () {
-  await this.page.goto('http://localhost:5173/upload');
+  await this.uploadPage.navigateTo();
 });
 
 When('I enter a task description', async function () {
-  await this.page.waitForSelector('[data-testid="task-input"]', { state: 'visible' });
-  await this.page.fill('[data-testid="task-input"]', 'Write a short essay about climate change.');
+  await this.uploadPage.setTaskDescription('Write a short essay about climate change.');
 });
 
 When('I enter a student submission', async function () {
-  await this.page.waitForSelector('[data-testid="submission-input"]', { state: 'visible' });
-  await this.page.fill('[data-testid="submission-input"]', 'Climate change is a serious global issue that affects us all.');
+  await this.uploadPage.setSubmissionText('Climate change is a serious global issue that affects us all.');
 });
 
 When('I submit the assessment form', async function () {
-  await this.page.waitForSelector('[data-testid="submit-button"]', { state: 'visible' });
-  await this.page.click('[data-testid="submit-button"]');
+  await this.uploadPage.submit();
 });
 
 When('I leave the submission field empty', async function () {
-  await this.page.waitForSelector('[data-testid="submission-input"]', { state: 'visible' });
-  await this.page.fill('[data-testid="submission-input"]', '');
+  await this.uploadPage.setSubmissionText('');
 });
 
 Then('I should be redirected to the "Assessment Results" page', async function () {
-  // Wait for a unique selector on the results page, increase timeout for slow AI assessment
-  await this.page.waitForSelector('[data-testid="results-heading"]', { timeout: 60000 });
-  const heading = await this.page.textContent('[data-testid="results-heading"]');
+  // Increase timeout for slow AI assessment
+  await this.page.waitForSelector(this.resultsPage.headingSelector, { timeout: 60000 });
+  const heading = await this.resultsPage.getHeadingText();
   expect(heading).toMatch(/Assessment Results/);
 });
 
 Then('I should see the AI-generated grade', async function () {
-  const text = await getFeedbackText(this.page);
-  expect(text).toMatch(/Grade:/i);
+  await this.resultsPage.waitForFeedbackVisible();
+  const gradeText = await this.resultsPage.getGrade();
+  expect(gradeText).toMatch(/Grade:/i);
 });
 
 Then('I should see strengths, areas for improvement, and individualized activity', async function () {
-  const text = await getFeedbackText(this.page);
-  expect(text).toMatch(/Strengths:/i);
-  expect(text).toMatch(/Areas for Improvement:/i);
-  expect(text).toMatch(/Individualized Activity:/i);
+  await this.resultsPage.waitForFeedbackVisible();
+  const strengths = await this.resultsPage.getStrengths();
+  const areas = await this.resultsPage.getAreasForImprovement();
+  const activity = await this.resultsPage.getIndividualizedActivity();
+  expect(strengths).toBeTruthy();
+  expect(areas).toBeTruthy();
+  expect(activity).toBeTruthy();
 });
 
 Then('I should see a reflection question and teacher suggestion', async function () {
-  const text = await getFeedbackText(this.page);
-  expect(text).toMatch(/Reflection Question:/i);
-  expect(text).toMatch(/Teacher Suggestion:/i);
+  this.resultsPage = new ResultsPage(this.page);
+  await this.resultsPage.waitForFeedbackVisible();
+  const reflection = await this.resultsPage.getReflectionQuestion();
+  const suggestion = await this.resultsPage.getTeacherSuggestion();
+  expect(reflection).toBeTruthy();
+  expect(suggestion).toBeTruthy();
 });
 
 Then('I should see spelling and grammar feedback', async function () {
-  const text = await getFeedbackText(this.page);
-  expect(text).toMatch(/Spelling and Grammar:/i);
+  this.resultsPage = new ResultsPage(this.page);
+  await this.resultsPage.waitForFeedbackVisible();
+  const spelling = await this.resultsPage.getSpellingAndGrammar();
+  expect(spelling).toBeTruthy();
 });
 
 Then('I should be able to expand to view AI reasoning', async function () {
-  await this.page.click('summary:has-text("Show AI Reasoning")');
-  const text = await getFeedbackText(this.page);
-  expect(text).toMatch(/reasoning/i);
+  this.resultsPage = new ResultsPage(this.page);
+  await this.resultsPage.expandReasoning();
+  const reasoning = await this.resultsPage.getReasoning();
+  expect(reasoning).toBeTruthy();
 });
 
 Then('the submit button should be disabled', async function () {

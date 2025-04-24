@@ -1,11 +1,12 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
+import { UploadPage } from '../pages/UploadPage.ts';
 
 Given('I have submitted an assignment for assessment', async function () {
-  await this.page.goto('http://localhost:5173/upload');
-  await this.page.fill('textarea#task', 'Write a short essay about climate change.');
-  await this.page.fill('textarea#textInput', 'Climate change is a serious global issue that affects us all.');
-  await this.page.click('button[type="submit"]');
+  await this.uploadPage.navigateTo();
+  await this.uploadPage.setTaskDescription('Write a short essay about climate change.');
+  await this.uploadPage.setSubmissionText('Climate change is a serious global issue that affects us all.');
+  await this.uploadPage.submit();
 });
 
 When('the AI agent is processing my submission', async function () {

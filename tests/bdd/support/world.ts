@@ -6,14 +6,24 @@ setDefaultTimeout(60000); // 60 seconds
 
 let browser: Browser;
 
+import { HomePage } from '../pages/HomePage.ts';
+import { UploadPage } from '../pages/UploadPage.ts';
+import { ResultsPage } from '../pages/ResultsPage.ts';
+
 class CustomWorld extends World {
   page!: Page;
+  homePage!: HomePage;
+  uploadPage!: UploadPage;
+  resultsPage!: ResultsPage;
 
   async openPage() {
     if (!browser) {
       browser = await chromium.launch({ headless: true });
     }
     this.page = await browser.newPage();
+    this.homePage = new HomePage(this.page);
+    this.uploadPage = new UploadPage(this.page);
+    this.resultsPage = new ResultsPage(this.page);
   }
 
   async closePage() {
