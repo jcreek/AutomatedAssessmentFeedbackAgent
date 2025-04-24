@@ -1,6 +1,13 @@
-import { Given, When, Then } from '@cucumber/cucumber';
+import { Given, When, Then, Before } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { UploadPage } from '../pages/UploadPage.ts';
+
+Before(function () {
+  if (process.env.AI_FOUNDRY_PROJECT_CONNECTION_STRING === 'test') {
+    console.log('Skipping in CI');
+    return this.skip();
+  }
+});
 
 Given('I have submitted an assignment for assessment', async function () {
   await this.uploadPage.navigateTo();
