@@ -3,6 +3,12 @@
 > An intelligent, agentic AI system designed to significantly reduce teachers' workloads by providing instant assessment and personalized differentiated feedback and follow-on activities for student assignments.
 
 
+## Who is this for?
+This project is designed for:
+- **Teachers** who want to save time on grading and provide more consistent, individualized feedback to students.
+- **Schools and educational institutions** seeking to improve the quality and efficiency of assessment and feedback workflows.
+
+
 ## ⚡ Workflow At a Glance
 - Upload an assignment and student response (file or text)
 - Instantly receive detailed, actionable feedback and differentiated individualized follow-on tasks and a grade
@@ -47,6 +53,79 @@ This project was developed for the [Microsoft Hack Together: AI Agents Hackathon
 - Improves quality and consistency of student feedback.
 - Allows teachers more time to focus on direct student interaction and lesson planning.
 
+
+## 🛠️ Responsible AI
+I am committed to responsible and ethical use of AI in education. This project:
+- Uses Azure OpenAI and Cognitive Services, which comply with Microsoft's responsible AI principles.
+- Does not retain or share student data beyond local processing in the browser (history is stored in localStorage only).
+- Clearly communicates to users when they are interacting with AI-generated feedback.
+- Is designed to minimize bias by providing transparent, explainable feedback and allowing teachers to review/edit results.
+- Does not use student data for model training or any secondary purpose.
+
+## ♿ Accessibility
+Accessibility is a core priority:
+- The interface is screen reader-friendly, with proper semantic HTML and ARIA labels.
+- All features are keyboard accessible (tab navigation, focus indicators).
+- Color contrast meets WCAG AA standards for readability.
+- Error messages and progress indicators are accessible to assistive technologies.
+- The site has been tested with browser accessibility tools and screen readers.
+
+
+## 🗺️ Architecture Diagram
+
+```mermaid
+flowchart TD
+    %% User
+    Teacher["Teacher (User)"]
+
+    %% Frontend
+    Upload["Upload Page"]
+    Results["Results/History Page"]
+    AgenticProgress["AgenticProgress Component"]
+    LocalStorage["localStorage (Browser)"]
+
+    %% API
+    APIEndpoint["API: /api/grade (Netlify serverless function)"]
+    APINote["API endpoints are Netlify serverless functions (SvelteKit endpoints)"]
+    APIEndpoint -.-> APINote
+
+    %% PartyKit
+    EventStream["PartyKit WebSocket (Real-time Agent Progress)"]
+    PartyKitNote["PartyKit provides WebSocket-based real-time updates on agent progress/tools."]
+    EventStream -.-> PartyKitNote
+
+    %% Azure
+    OpenAI["Azure OpenAI (NLP, Grading, Feedback)"]
+
+    %% Data Flow
+    Teacher -->|Uploads assignment & student work| Upload
+    Upload -->|Calls| APIEndpoint
+    APIEndpoint -->|Sends data & assignment description| OpenAI
+    APIEndpoint -->|Streams grading progress| EventStream
+    EventStream -->|Updates progress| AgenticProgress
+    APIEndpoint -->|Returns feedback & grade| Results
+    Results -->|Planned: Teacher reviews/edits feedback| Results
+    Results -->|Saves assessment| LocalStorage
+    Results -->|Displays feedback, history| Teacher
+
+    PrivacyNote["Assessment history is stored only in the user’s browser (localStorage), not sent to any backend."]
+    LocalStorage --> PrivacyNote
+
+    class Teacher user;
+    class Upload,Results,AgenticProgress,LocalStorage frontend;
+    class APIEndpoint api;
+    class EventStream partykit;
+    class OpenAI azure;
+```
+
+## 👥 Teacher Workflow Example
+
+Here's an example of how a teacher might use the Automated Assessment and Feedback Agent:
+
+1. The teacher uploads an assignment and a student response, and uploads them to the platform.
+2. The platform generates instant, individualized feedback and a grade using Azure OpenAI.
+3. The feedback is stored locally in the browser. 
+4. The teacher reviews the feedback and grade, and can edit or modify them as needed.
 
 ## 🔮 Future Enhancements
 
