@@ -26,6 +26,6 @@ jobs:
         env:
           NODE_ENV: test
           AI_FOUNDRY_PROJECT_CONNECTION_STRING: test
-          AI_MODEL=gpt-4o
-          VITE_PARTYKIT_BASE_URL=wss://partykit.jcreek.partykit.dev
-          PARTYKIT_BASE_URL=wss://partykit.jcreek.partykit.dev
+          AI_MODEL: gpt-4o
+          VITE_PARTYKIT_BASE_URL: wss://partykit.jcreek.partykit.dev
+          PARTYKIT_BASE_URL: wss://partykit.jcreek.partykit.dev
