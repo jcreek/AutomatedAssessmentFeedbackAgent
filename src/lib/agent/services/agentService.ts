@@ -11,15 +11,20 @@ import {
 } from '../tools/index';
 import { AI_FOUNDRY_PROJECT_CONNECTION_STRING, AI_MODEL } from '$env/static/private';
 
-if (!AI_FOUNDRY_PROJECT_CONNECTION_STRING) {
+const isTestEnv = process.env.NODE_ENV === 'test' || AI_FOUNDRY_PROJECT_CONNECTION_STRING === 'test';
+
+const safeConnString = AI_FOUNDRY_PROJECT_CONNECTION_STRING || (isTestEnv ? 'dummy-connection-string' : undefined);
+const safeModel = AI_MODEL || (isTestEnv ? 'dummy-model' : undefined);
+
+if (!safeConnString && !isTestEnv) {
   throw new Error('AI_FOUNDRY_PROJECT_CONNECTION_STRING is not set');
 }
-if (!AI_MODEL) {
+if (!safeModel && !isTestEnv) {
   throw new Error('AI_MODEL is not set');
 }
 
 export const client = AIProjectsClient.fromConnectionString(
-  AI_FOUNDRY_PROJECT_CONNECTION_STRING,
+  safeConnString!,
   new DefaultAzureCredential()
 );
 
