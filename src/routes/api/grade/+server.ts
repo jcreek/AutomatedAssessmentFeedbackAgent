@@ -1,6 +1,6 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
-import { gradeSubmissionWithAgent } from '$lib/utils/ai';
+import { gradeSubmissionWithAgent } from '$lib/server/ai';
 
 export const POST: RequestHandler = async (event: RequestEvent) => {
   try {

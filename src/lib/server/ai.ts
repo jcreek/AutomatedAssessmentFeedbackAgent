@@ -1,7 +1,7 @@
 import { client, agent, toolResources } from '../agent/services/agentService';
 import { RunStreamEvent, ErrorEvent, type ThreadRunOutput } from '@azure/ai-projects';
 import { PARTYKIT_BASE_URL } from '$env/static/private';
-import type { OpenAIResponse } from './types';
+import type { OpenAIResponse } from '../utils/types';
 
 export function buildGradingPrompt(submission: string, task: string): string {
 	return `You are an expert secondary school teacher and AI assessment agent. Assess the following student submission in the context of the assignment/task provided.
