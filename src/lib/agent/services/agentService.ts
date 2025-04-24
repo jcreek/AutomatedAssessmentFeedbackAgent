@@ -11,21 +11,17 @@ import {
 } from '../tools/index';
 import { AI_FOUNDRY_PROJECT_CONNECTION_STRING, AI_MODEL } from '$env/static/private';
 
-const isTestEnv = process.env.NODE_ENV === 'test' || AI_FOUNDRY_PROJECT_CONNECTION_STRING === 'test';
-
-const safeConnString = AI_FOUNDRY_PROJECT_CONNECTION_STRING || (isTestEnv ? 'dummy-connection-string' : undefined);
-const safeModel = AI_MODEL || (isTestEnv ? 'dummy-model' : undefined);
-
-if (!safeConnString && !isTestEnv) {
+if (!AI_FOUNDRY_PROJECT_CONNECTION_STRING) {
   throw new Error('AI_FOUNDRY_PROJECT_CONNECTION_STRING is not set');
 }
-if (!safeModel && !isTestEnv) {
+if (!AI_MODEL) {
   throw new Error('AI_MODEL is not set');
 }
 
-export const client = !isTestEnv && safeConnString
-  ? AIProjectsClient.fromConnectionString(safeConnString, new DefaultAzureCredential())
-  : undefined;
+export const client = AIProjectsClient.fromConnectionString(
+  AI_FOUNDRY_PROJECT_CONNECTION_STRING,
+  new DefaultAzureCredential()
+);
 
 // const codeInterpreterTool = ToolUtility.createCodeInterpreterTool([]);
 
@@ -70,15 +66,13 @@ export const toolResources = allTools.reduce<Record<string, any>>((map, t) => {
   return map;
 }, {});
 
-export const agent = client
-  ? await client.agents.createAgent(AI_MODEL, {
-      name: `assessment-feedback-agent`,
-      instructions,
-      temperature: 0.5,
-      tools,
-      toolResources,
-      requestOptions: {
-        headers: { 'x-ms-enable-preview': 'true' }
-      }
-    })
-  : undefined;
+export const agent = await client.agents.createAgent(AI_MODEL, {
+  name: `assessment-feedback-agent`,
+  instructions,
+  temperature: 0.5,
+  tools,
+  toolResources,
+  requestOptions: {
+    headers: { 'x-ms-enable-preview': 'true' }
+  }
+});

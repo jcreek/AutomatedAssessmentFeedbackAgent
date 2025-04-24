@@ -9,6 +9,7 @@ on:
 jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
+    environment: test 
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js
@@ -24,8 +25,7 @@ jobs:
       - name: Run Playwright/BDD tests
         run: npm run bdd:full
         env:
-          NODE_ENV: test
-          AI_FOUNDRY_PROJECT_CONNECTION_STRING: test
+          AI_FOUNDRY_PROJECT_CONNECTION_STRING: ${{ secrets.AI_FOUNDRY_PROJECT_CONNECTION_STRING }}
           AI_MODEL: gpt-4o
-          VITE_PARTYKIT_BASE_URL: wss://partykit.jcreek.partykit.dev
-          PARTYKIT_BASE_URL: wss://partykit.jcreek.partykit.dev
+          VITE_PARTYKIT_BASE_URL: ${{ secrets.VITE_PARTYKIT_BASE_URL }}
+          PARTYKIT_BASE_URL: ${{ secrets.PARTYKIT_BASE_URL }}
