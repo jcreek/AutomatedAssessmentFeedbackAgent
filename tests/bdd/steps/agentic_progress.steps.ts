@@ -5,7 +5,7 @@ import { UploadPage } from '../pages/UploadPage.ts';
 Before(function () {
   if (process.env.AI_FOUNDRY_PROJECT_CONNECTION_STRING === 'test') {
     console.log('Skipping in CI');
-    return this.skip();
+    return 'skipped';
   }
 });
 
