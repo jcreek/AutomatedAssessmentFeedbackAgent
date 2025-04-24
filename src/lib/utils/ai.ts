@@ -145,7 +145,12 @@ export async function gradeSubmissionWithAgent(
   task: string,
   roomId: string
 ): Promise<OpenAIResponse> {
-  if (!client || !agent) {
+  if (!client) {
+    // In test/CI mode, return fallback data
+    return fallbackGrade(submission, task);
+  }
+
+  if (!agent) {
     throw new Error('Agent not available');
   }
 

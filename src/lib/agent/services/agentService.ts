@@ -23,10 +23,9 @@ if (!safeModel && !isTestEnv) {
   throw new Error('AI_MODEL is not set');
 }
 
-export const client = AIProjectsClient.fromConnectionString(
-  safeConnString!,
-  new DefaultAzureCredential()
-);
+export const client = !isTestEnv && safeConnString
+  ? AIProjectsClient.fromConnectionString(safeConnString, new DefaultAzureCredential())
+  : undefined;
 
 // const codeInterpreterTool = ToolUtility.createCodeInterpreterTool([]);
 
@@ -71,13 +70,15 @@ export const toolResources = allTools.reduce<Record<string, any>>((map, t) => {
   return map;
 }, {});
 
-export const agent = await client.agents.createAgent(AI_MODEL, {
-  name: `assessment-feedback-agent`,
-  instructions,
-  temperature: 0.5,
-  tools,
-  toolResources,
-  requestOptions: {
-    headers: { 'x-ms-enable-preview': 'true' }
-  }
-});
+export const agent = client
+  ? await client.agents.createAgent(AI_MODEL, {
+      name: `assessment-feedback-agent`,
+      instructions,
+      temperature: 0.5,
+      tools,
+      toolResources,
+      requestOptions: {
+        headers: { 'x-ms-enable-preview': 'true' }
+      }
+    })
+  : undefined;
