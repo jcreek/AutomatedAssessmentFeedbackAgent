@@ -13,7 +13,7 @@ STUDENT SUBMISSION:
 ${submission}
 
 Follow these steps:
-1. Grade the work with a letter (A+ is best, E- is worst), using clear, objective criteria.
+1. Grade the work. Use whatever grading scheme is present in the rubric. If none is present then grade with a letter (A+ is best, E- is worst), using clear, objective criteria. DO NOT mention tool errors.
 2. Identify specific strengths, referencing the success criteria.
 3. Identify misconceptions or areas for improvement, using formative assessment language.
 4. Design an individualized activity or exercise for the student to address their misconceptions or extend their learning. This activity should be:
