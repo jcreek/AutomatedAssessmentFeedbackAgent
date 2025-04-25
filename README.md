@@ -96,7 +96,9 @@ _Why is this different from other AI grading tools?_
 > Watch live tool use and reasoning.  
 > Review or clear past assessments directly in history.
 
-### Architecture Diagram
+### System Flow Diagram (with HITL)
+
+This shows how a user interacts with the system and how requests are processed, including HITL.
 
 ```mermaid
 flowchart TD
@@ -127,7 +129,26 @@ flowchart TD
     APIHITL -->|Returns final feedback| Results
 ```
 
-Assessment history is **only stored locally** (no external storage).
+### Architecture Diagram
+
+This shows the big-picture technical structure and how my chosen technologies fit together.
+
+The architecture includes:
+
+- Frontend: SvelteKit app (browser)
+   - Connects to PartyKit (for real-time events)
+   - Calls API endpoints (/api/grade, /api/hitl-review)
+   - Saves assessment history in browser localStorage
+- Backend: SvelteKit API routes (serverless functions, e.g., Netlify)
+   - /api/grade: Handles grading, talks to Azure OpenAI
+   - /api/hitl-review: Handles teacher review, resumes AI grading
+- Third-Party Services:
+   - Azure OpenAI (AI grading, feedback)
+   - Azure Cognitive Services (if used)
+   - PartyKit (WebSocket server for real-time updates)
+- Data Storage: Only in browser (localStorage), no backend DB
+
+Actual diagram - TODO 
 
 ---
 
