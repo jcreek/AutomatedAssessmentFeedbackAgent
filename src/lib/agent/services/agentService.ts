@@ -66,13 +66,60 @@ export const toolResources = allTools.reduce<Record<string, any>>((map, t) => {
   return map;
 }, {});
 
-export const agent = await client.agents.createAgent(AI_MODEL, {
-  name: `assessment-feedback-agent`,
-  instructions,
-  temperature: 0.5,
-  tools,
-  toolResources,
-  requestOptions: {
-    headers: { 'x-ms-enable-preview': 'true' }
+export async function getOrCreateAgent() {
+  
+  const agentName = `assessment-feedback-agent`;
+  // List all agents (may need pagination for large numbers)
+  const agentsResponse = await client.agents.listAgents();
+  const agents = Array.isArray(agentsResponse.data) ? agentsResponse.data : [];
+  const existing = agents.find((a: any) => a.name === agentName);
+  if (existing) {
+    return existing;
   }
-});
+  // Otherwise, create new agent
+  const agent = await client.agents.createAgent(AI_MODEL, {
+    name: agentName,
+    instructions,
+    temperature: 0.5,
+    tools,
+    toolResources,
+    requestOptions: {
+      headers: { 'x-ms-enable-preview': 'true' }
+    }
+  });
+  return agent;
+}
+
+export const agent = await getOrCreateAgent();
+
+/**
+ * Delete all agents in the workspace.
+ * Use with caution! This will remove ALL agents.
+ */
+export async function deleteAllAgents() {
+  try {
+    let allAgents: any[] = [];
+    let after: string | undefined = undefined;
+    let hasMore = true;
+
+    while (hasMore) {
+      const response = await client.agents.listAgents(after ? { after } : {});
+      const agents = Array.isArray(response.data) ? response.data : [];
+      allAgents = allAgents.concat(agents);
+      hasMore = response.hasMore;
+      after = response.lastId;
+    }
+
+    for (const agent of allAgents) {
+      await client.agents.deleteAgent(agent.id, {
+        requestOptions: {
+          headers: { 'x-ms-enable-preview': 'true' }
+        }
+      });
+      console.info(`Agent ${agent.id} (${agent.name}) deleted.`);
+    }
+    console.info('All agents deleted successfully.');
+  } catch (err) {
+    console.warn('Failed to delete all agents:', err);
+  }
+}
