@@ -40,7 +40,10 @@ RESPONSE FORMAT (respond with a single JSON object, no extra text):
 Respond ONLY with the JSON object, with no preamble or explanation.`;
 }
 
-export function buildGradingPromptWithSupportForHumanInTheLoop(submission: string, task: string): string {
+export function buildGradingPromptWithSupportForHumanInTheLoop(
+	submission: string,
+	task: string
+): string {
 	return `You are an expert secondary school teacher and AI assessment agent. Assess the following student submission in the context of the assignment/task provided.
 
 TASK/ASSIGNMENT:
@@ -128,7 +131,6 @@ EXAMPLES:
 - Reasoning: The task and submission are both clear and evaluatable without a rubric.
 
 Respond ONLY with the JSON object, with no preamble or explanation.`;
-
 }
 
 function fallbackGrade(submission: string, task: string): OpenAIResponse {
@@ -223,7 +225,8 @@ async function processRunStream(
 export async function gradeSubmissionWithAgent(
 	submission: string,
 	task: string,
-	roomId: string
+	roomId: string,
+	hitl: boolean = false
 ): Promise<OpenAIResponse> {
 	if (!client || !agent) {
 		throw new Error('Agent not available');
@@ -232,7 +235,9 @@ export async function gradeSubmissionWithAgent(
 	const thread = await client.agents.createThread();
 	await client.agents.createMessage(thread.id, {
 		role: 'user',
-		content: buildGradingPrompt(submission, task)
+		content: hitl
+			? buildGradingPromptWithSupportForHumanInTheLoop(submission, task)
+			: buildGradingPrompt(submission, task)
 	});
 
 	let initialStream: AsyncIterable<RunStreamEvent>;
@@ -264,9 +269,65 @@ export async function gradeSubmissionWithAgent(
 	const jsonText = match ? match[0] : raw;
 
 	try {
-		return JSON.parse(jsonText) as OpenAIResponse;
+		const parsed = JSON.parse(jsonText) as OpenAIResponse;
+		if (parsed.grade === 'HUMAN_REVIEW_REQUIRED') {
+			return {
+				...parsed,
+				success: true,
+				threadId: thread.id,
+				runId: finalRun?.id ?? undefined,
+				hitlContext: { threadId: thread.id, runId: finalRun?.id ?? undefined }
+			};
+		}
+		return parsed;
 	} catch (parseErr) {
 		console.error('JSON parse failed, returning fallback:', parseErr);
 		return { ...fallbackGrade(submission, task), reasoning: raw };
+	}
+}
+
+export async function resumeAgentWithHumanReview(
+	humanReview: string,
+	context: { threadId: string; runId?: string; roomId?: string; [key: string]: any }
+): Promise<OpenAIResponse> {
+	const { threadId, roomId = '' } = context;
+	await client.agents.createMessage(threadId, {
+		role: 'user',
+		content: `[HUMAN REVIEW]: ${humanReview}`
+	});
+
+	let stream: AsyncIterable<RunStreamEvent>;
+	try {
+		const runInvoker = client.agents.createRun(threadId, agent.id, {
+			parallelToolCalls: false
+		});
+		stream = await runInvoker.stream();
+	} catch (err) {
+		console.error('Failed to start run:', err);
+		return fallbackGrade('', '');
+	}
+
+	let finalRun: ThreadRunOutput;
+	try {
+		finalRun = await processRunStream(threadId, stream, roomId);
+	} catch (err) {
+		console.error('Agent streaming failed:', err);
+		return fallbackGrade('', '');
+	}
+
+	const msgs = await client.agents.listMessages(threadId);
+	const assistant = msgs.data.find((m) => m.role === 'assistant');
+	const raw = assistant ? extractTextFromMessage(assistant) : '';
+
+	// strip anything before the JSON object
+	const match = raw.match(/\{[\s\S]*\}$/);
+	const jsonText = match ? match[0] : raw;
+
+	try {
+		const parsed = JSON.parse(jsonText) as OpenAIResponse;
+		return parsed;
+	} catch (parseErr) {
+		console.error('JSON parse failed, returning fallback:', parseErr);
+		return { ...fallbackGrade('', ''), reasoning: raw };
 	}
 }

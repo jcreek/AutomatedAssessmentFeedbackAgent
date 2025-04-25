@@ -9,8 +9,15 @@
 	let errorMsg = '';
 	let toolEvents: Array<{ tool: string; time: string }> = [];
 	let roomId: string = '';
+	let hitl = false; // Human-in-the-Loop toggle
 	let ws: WebSocket | null = null;
 	const PARTYKIT_BASE_URL = import.meta.env.VITE_PARTYKIT_BASE_URL;
+
+	// HITL state
+	let humanReviewRequired = false;
+	let aiReasoning = '';
+	let humanReviewText = '';
+	let hitlContext: any = null;
 
 	function handleFileChange(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -40,7 +47,7 @@
 		const THINKING_EVENT = { tool: 'thinking', time: new Date().toISOString() };
 		function ensureThinkingStep(events) {
 			// Remove any existing 'thinking' event
-			const filtered = events.filter(e => e.tool !== 'thinking');
+			const filtered = events.filter((e) => e.tool !== 'thinking');
 			return [THINKING_EVENT, ...filtered];
 		}
 		toolEvents = [THINKING_EVENT];
@@ -64,13 +71,14 @@
 		}
 		const formData = new FormData();
 		formData.append('task', taskDescription.trim());
-		
+
 		if (file) {
 			formData.append('file', file);
 		} else if (textInput.trim().length > 0) {
 			formData.append('text', textInput.trim());
 		}
 		formData.append('roomId', roomId);
+		formData.append('hitl', hitl ? 'true' : 'false');
 
 		errorMsg = '';
 		try {
@@ -78,17 +86,27 @@
 				method: 'POST',
 				body: formData
 			});
+
 			let result;
 			try {
 				result = await response.json();
-			} catch {
+			} catch (err) {
+				console.error('Error parsing /api/grade response:', err);
 				errorMsg = 'Received an invalid response from the server.';
 				submitting = false;
 				return;
 			}
 			if (response.ok && result.success) {
-				// Save to localStorage history
+				if (result.grade === 'HUMAN_REVIEW_REQUIRED') {
+					humanReviewRequired = true;
+					aiReasoning = result.reasoning;
+					hitlContext = result.hitlContext || { threadId: result.threadId, runId: result.runId };
+					submitting = false;
+					return;
+				}
+
 				try {
+					// Save to localStorage history
 					let prev = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
 					const entry = {
 						timestamp: Date.now(),
@@ -100,7 +118,7 @@
 					localStorage.setItem('assessmentHistory', JSON.stringify(prev.slice(0, 50)));
 				} catch {}
 
-				// Redirect to /results
+				// Redirect to /results if HITL is not needed
 				window.location.assign('/results');
 
 				file = null;
@@ -108,6 +126,7 @@
 				taskDescription = '';
 				return;
 			} else {
+				console.error('Grade API error or non-success:', response, result);
 				if (result && result.error) {
 					errorMsg = `Sorry, something went wrong: ${result.error}`;
 				} else if (response.status === 413) {
@@ -119,10 +138,49 @@
 				}
 			}
 		} catch (err) {
+			console.error('Error submitting grade:', err);
 			errorMsg = 'Network or server error. Please check your connection and try again.';
 		} finally {
-      // Disabled to make the transition to the results page smoother
+			// Disabled to make the transition to the results page smoother
 			// submitting = false;
+		}
+	}
+
+	async function submitHumanReview() {
+		submitting = true;
+		errorMsg = '';
+		try {
+			const response = await fetch('/api/hitl-review', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					humanReview: humanReviewText,
+					context: hitlContext
+				})
+			});
+
+			const result = await response.json();
+
+			if (response.ok && result.success) {
+				let prev = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
+				const entry = {
+					timestamp: Date.now(),
+					...result,
+					submission: result.submission || textInput || '',
+					task: taskDescription
+				};
+				prev.unshift(entry);
+				localStorage.setItem('assessmentHistory', JSON.stringify(prev.slice(0, 50)));
+				window.location.assign('/results');
+			} else {
+				console.error('HITL review API error or non-success:', response, result);
+				errorMsg = result.error || 'Unknown error during HITL review.';
+			}
+		} catch (err) {
+			console.error('Error submitting HITL review:', err);
+			errorMsg = 'Network or server error during HITL review.';
+		} finally {
+			submitting = false;
 		}
 	}
 </script>
@@ -138,13 +196,31 @@
 			{errorMsg}
 		</div>
 	{/if}
-	{#if submitting}
+
+	{#if humanReviewRequired}
+		<div class="mb-6 rounded border-l-4 border-yellow-400 bg-yellow-50 p-4">
+			<h2 class="mb-2 font-bold text-yellow-800">Human Review Needed</h2>
+			<p class="mb-3 text-gray-800">{aiReasoning}</p>
+			<textarea
+				bind:value={humanReviewText}
+				rows="4"
+				class="mb-3 w-full rounded border p-2"
+				placeholder="Enter your feedback, grade, or comments..."
+			></textarea>
+			<button
+				class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+				on:click|preventDefault={submitHumanReview}
+				disabled={submitting || !humanReviewText.trim()}
+			>
+				Submit Review
+			</button>
+		</div>
+	{:else if submitting}
 		<AgenticProgress {toolEvents} />
 	{:else}
 		<h1 class="mb-4 text-2xl font-bold">Upload Student Submissions</h1>
 		<p class="mb-6">Upload student assignments for instant AI-powered assessment and feedback.</p>
 		<form class="space-y-6" on:submit|preventDefault={handleSubmit}>
-
 			<div class="mb-4">
 				<label class="mb-1 block font-semibold" for="task"
 					>Task/Assignment Description <span class="text-red-500">*</span></label
@@ -161,20 +237,48 @@
 					data-testid="task-input"
 				></textarea>
 			</div>
+
+			<div class="mb-4">
+				<label class="flex cursor-pointer items-center gap-3 select-none" for="hitl-toggle">
+					<span class="relative inline-block h-7 w-12 align-middle select-none">
+						<input
+							type="checkbox"
+							id="hitl-toggle"
+							class="peer absolute h-0 w-0 opacity-0"
+							bind:checked={hitl}
+							disabled={submitting}
+						/>
+						<span
+							class="block h-7 w-12 rounded-full bg-gray-300 transition-colors peer-checked:bg-blue-600"
+						></span>
+						<span
+							class="dot absolute top-1 left-1 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5"
+						></span>
+					</span>
+					<span class="font-medium text-gray-900"
+						>EXPERIMENTAL: Let the agent request human review if needed (Human-in-the-Loop)</span
+					>
+				</label>
+				<div class="mt-1 ml-1 text-sm text-gray-500">
+					If enabled, the AI can ask for human help on unclear or unevaluable submissions.
+				</div>
+			</div>
 			<div class="mb-4">
 				<label class="mb-1 block font-semibold" for="file">Upload a file (PDF, DOCX, TXT):</label>
 				<input
 					id="file"
 					type="file"
 					accept=".pdf,.doc,.docx,.txt"
-					class="block w-full rounded border p-2 bg-gray-100 cursor-not-allowed"
+					class="block w-full cursor-not-allowed rounded border bg-gray-100 p-2"
 					on:change={handleFileChange}
 					disabled
 				/>
 				<span class="text-sm text-red-600">File upload is disabled for this hackathon demo.</span>
 			</div>
 			<div class="mb-4">
-				<label class="mb-1 block font-semibold" for="textInput">Paste assignment text: <span class="text-red-500">*</span></label>
+				<label class="mb-1 block font-semibold" for="textInput"
+					>Paste assignment text: <span class="text-red-500">*</span></label
+				>
 				<textarea
 					id="textInput"
 					rows="5"
