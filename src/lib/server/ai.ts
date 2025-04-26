@@ -6,11 +6,17 @@ import type { OpenAIResponse } from '../utils/types';
 export function buildGradingPrompt(submission: string, task: string): string {
 	return `You are an expert secondary school teacher and AI assessment agent. Assess the following student submission in the context of the assignment/task provided.
 
-TASK/ASSIGNMENT:
+===== TASK/ASSIGNMENT possibly including rubric or available marks =====
+
 ${task}
 
-STUDENT SUBMISSION:
+===== END TASK/ASSIGNMENT =====
+
+===== STUDENT SUBMISSION =====
+
 ${submission}
+
+===== END STUDENT SUBMISSION =====
 
 Follow these steps:
 1. Grade the work. Use whatever grading scheme is present in the rubric. If none is present then grade with a letter (A+ is best, E- is worst), using clear, objective criteria. DO NOT mention tool errors.
@@ -46,11 +52,18 @@ export function buildGradingPromptWithSupportForHumanInTheLoop(
 ): string {
 	return `You are an expert secondary school teacher and AI assessment agent. Assess the following student submission in the context of the assignment/task provided.
 
-TASK/ASSIGNMENT:
+
+===== TASK/ASSIGNMENT possibly including rubric or available marks =====
+
 ${task}
 
-STUDENT SUBMISSION:
+===== END TASK/ASSIGNMENT =====
+
+===== STUDENT SUBMISSION =====
+
 ${submission}
+
+===== END STUDENT SUBMISSION =====
 
 Follow these steps:
 1. Grade the work. Use whatever grading scheme is present in the rubric. If none is present, grade with a letter (A+ is best, E- is worst), using clear, objective criteria.
