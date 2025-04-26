@@ -1,7 +1,9 @@
 import { client, agent, toolResources } from '../agent/services/agentService';
+import logger from '../utils/logger';
 import { RunStreamEvent, ErrorEvent, type ThreadRunOutput } from '@azure/ai-projects';
 import { PARTYKIT_BASE_URL } from '$env/static/private';
 import type { OpenAIResponse } from '../utils/types';
+import { json } from 'stream/consumers';
 
 function sanitizeForPrompt(input: string): string {
 	return input
@@ -222,7 +224,7 @@ async function processRunStream(
 ): Promise<ThreadRunOutput> {
 	for await (const evt of stream) {
 		// if (!evt.event.includes('delta')) {
-		//   console.log('▶️ Stream event:', evt.event);
+		//   logger.info('▶️ Stream event:', evt.event);
 		// }
 
 		if (evt.event === RunStreamEvent.ThreadRunRequiresAction) {
@@ -306,7 +308,9 @@ export async function gradeSubmissionWithAgent(
 		});
 		initialStream = await runInvoker.stream();
 	} catch (err) {
-		console.error('Failed to start run:', err);
+		logger.error(`Failed to start run on thread ${thread.id}:`, err);
+		logger.info('Task:', task);
+		logger.info('Submission', submission);
 		return fallbackGrade(submission, task);
 	}
 
@@ -315,7 +319,7 @@ export async function gradeSubmissionWithAgent(
 	try {
 		finalRun = await processRunStream(thread.id, initialStream, roomId);
 	} catch (err) {
-		console.error('Agent streaming failed:', err);
+		logger.error(`Agent streaming failed on thread ${thread.id}:`, err);
 		return fallbackGrade(submission, task);
 	}
 
@@ -340,7 +344,8 @@ export async function gradeSubmissionWithAgent(
 		}
 		return parsed;
 	} catch (parseErr) {
-		console.error('JSON parse failed, returning fallback:', parseErr);
+		logger.error(`JSON parse failed, returning fallback on thread ${thread.id}:`, parseErr);
+		logger.info('JSON', jsonText);
 		return { ...fallbackGrade(submission, task), reasoning: raw };
 	}
 }
@@ -362,7 +367,7 @@ export async function resumeAgentWithHumanReview(
 		});
 		stream = await runInvoker.stream();
 	} catch (err) {
-		console.error('Failed to start run:', err);
+		logger.error(`Failed to start run on thread ${threadId}:`, err);
 		return fallbackGrade('', '');
 	}
 
@@ -370,7 +375,7 @@ export async function resumeAgentWithHumanReview(
 	try {
 		finalRun = await processRunStream(threadId, stream, roomId);
 	} catch (err) {
-		console.error('Agent streaming failed:', err);
+		logger.error(`Agent streaming failed on thread ${threadId}:`, err);
 		return fallbackGrade('', '');
 	}
 
@@ -386,7 +391,8 @@ export async function resumeAgentWithHumanReview(
 		const parsed = JSON.parse(jsonText) as OpenAIResponse;
 		return parsed;
 	} catch (parseErr) {
-		console.error('JSON parse failed, returning fallback:', parseErr);
+		logger.error(`JSON parse failed, returning fallback on thread ${threadId}:`, parseErr);
+		logger.info('JSON', jsonText);
 		return { ...fallbackGrade('', ''), reasoning: raw };
 	}
 }
