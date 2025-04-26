@@ -3,8 +3,32 @@ import { RunStreamEvent, ErrorEvent, type ThreadRunOutput } from '@azure/ai-proj
 import { PARTYKIT_BASE_URL } from '$env/static/private';
 import type { OpenAIResponse } from '../utils/types';
 
-export function buildGradingPrompt(submission: string, task: string): string {
-	return `You are an expert secondary school teacher and AI assessment agent. Assess the following student submission in the context of the assignment/task provided.
+function sanitizeForPrompt(input: string): string {
+  return input
+    .replace(/\\/g, '\\\\')
+    .replace(/`/g, '\\`')
+    .replace(/"/g, '\\"')
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ''); // remove other control chars
+}
+
+function buildBaseGradingPrompt({
+  task,
+  submission,
+  steps,
+  responseFormat,
+  extraSections = ''
+}: {
+  task: string;
+  submission: string;
+  steps: string;
+  responseFormat: string;
+  extraSections?: string;
+}): string {
+  return `You are an expert school teacher and AI assessment agent. Assess the following student submission in the context of the assignment/task provided.
 
 ===== TASK/ASSIGNMENT possibly including rubric or available marks =====
 
@@ -18,8 +42,18 @@ ${submission}
 
 ===== END STUDENT SUBMISSION =====
 
-Follow these steps:
-1. Grade the work. Use whatever grading scheme is present in the rubric. If none is present then grade with a letter (A+ is best, E- is worst), using clear, objective criteria. DO NOT mention tool errors.
+${steps}
+
+${responseFormat}
+
+${extraSections}`;
+}
+
+export function buildGradingPrompt(submission: string, task: string): string {
+  const safeSubmission = sanitizeForPrompt(submission);
+  const safeTask = sanitizeForPrompt(task);
+  const steps = `Follow these steps:
+1. Grade the work. Use whatever grading scheme is present in the rubric. If none is present then grade with a letter (A+ is best, E- is worst), using clear, objective criteria. Be aware that the rubric may just give a maximum number of marks, in which case you should mark out of that number, for example "(20)" would mean it's out of 20 marks. DO NOT mention tool errors. 
 2. Identify specific strengths, referencing the success criteria.
 3. Identify misconceptions or areas for improvement, using formative assessment language.
 4. Design an individualized activity or exercise for the student to address their misconceptions or extend their learning. This activity should be:
@@ -28,9 +62,8 @@ Follow these steps:
    - Aligned with the curriculum and learning objectives.
 5. Write a reflection question for the student to encourage metacognition.
 6. Suggest to the teacher one way to support this student in the next lesson.
-7. Show your reasoning step by step (chain-of-thought).
-
-RESPONSE FORMAT (respond with a single JSON object, no extra text):
+7. Show your reasoning step by step (chain-of-thought).`;
+  const responseFormat = `RESPONSE FORMAT (respond with a single JSON object, no extra text):
 
 {
   "grade": "<number or string, e.g. 8/10, A, B+>",
@@ -44,29 +77,22 @@ RESPONSE FORMAT (respond with a single JSON object, no extra text):
 }
 
 Respond ONLY with the JSON object, with no preamble or explanation.`;
+  return buildBaseGradingPrompt({
+    task: safeTask,
+    submission: safeSubmission,
+    steps,
+    responseFormat
+  });
 }
 
 export function buildGradingPromptWithSupportForHumanInTheLoop(
-	submission: string,
-	task: string
+  submission: string,
+  task: string
 ): string {
-	return `You are an expert secondary school teacher and AI assessment agent. Assess the following student submission in the context of the assignment/task provided.
-
-
-===== TASK/ASSIGNMENT possibly including rubric or available marks =====
-
-${task}
-
-===== END TASK/ASSIGNMENT =====
-
-===== STUDENT SUBMISSION =====
-
-${submission}
-
-===== END STUDENT SUBMISSION =====
-
-Follow these steps:
-1. Grade the work. Use whatever grading scheme is present in the rubric. If none is present, grade with a letter (A+ is best, E- is worst), using clear, objective criteria.
+  const safeSubmission = sanitizeForPrompt(submission);
+  const safeTask = sanitizeForPrompt(task);
+  const steps = `Follow these steps:
+1. Grade the work. Use whatever grading scheme is present in the rubric. If none is present, grade with a letter (A+ is best, E- is worst), using clear, objective criteria. Be aware that the rubric may just give a maximum number of marks, in which case you should mark out of that number, for example "(20)" would mean it's out of 20 marks. DO NOT mention tool errors. 
 2. Identify specific strengths, referencing the success criteria.
 3. Identify misconceptions or areas for improvement, using formative assessment language.
 4. Design an individualized activity or exercise for the student to address their misconceptions or extend their learning. This activity should be:
@@ -75,9 +101,8 @@ Follow these steps:
    - Aligned with the curriculum and learning objectives.
 5. Write a reflection question for the student to encourage metacognition.
 6. Suggest to the teacher one way to support this student in the next lesson.
-7. Show your reasoning step by step (chain-of-thought).
-
-RESPONSE FORMAT (respond with a single JSON object, no extra text):
+7. Show your reasoning step by step (chain-of-thought).`;
+  const responseFormat = `RESPONSE FORMAT (respond with a single JSON object, no extra text):
 
 {
   "grade": "<number or string, e.g. 8/10, A, B+>",
@@ -88,8 +113,8 @@ RESPONSE FORMAT (respond with a single JSON object, no extra text):
   "teacherSuggestion": "<text>",
   "spellingAndGrammar": "<text>",
   "reasoning": "<step-by-step explanation>"
-}
-
+}`;
+  const extraSections = `
 CONFIDENCE CHECK:
 
 You should request human review if:
@@ -144,6 +169,13 @@ EXAMPLES:
 - Reasoning: The task and submission are both clear and evaluatable without a rubric.
 
 Respond ONLY with the JSON object, with no preamble or explanation.`;
+  return buildBaseGradingPrompt({
+    task: safeTask,
+    submission: safeSubmission,
+    steps,
+    responseFormat,
+    extraSections
+  });
 }
 
 function fallbackGrade(submission: string, task: string): OpenAIResponse {
