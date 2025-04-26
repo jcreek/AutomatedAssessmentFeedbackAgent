@@ -42,7 +42,7 @@ export const POST: RequestHandler = async (event: RequestEvent) => {
 			JSON.stringify({
 				success: true,
 				task: task.trim(),
-				feedback: `Grade: ${aiResult.grade}\nStrengths: ${aiResult.strengths}\nAreas for Improvement: ${aiResult.areasForImprovement}\nIndividualized Activity: ${aiResult.individualizedActivity}\nSpelling and Grammar: ${aiResult.spellingAndGrammar}\nReasoning: ${aiResult.reasoning}`,
+				feedback: `Suggested Grade: ${aiResult.grade}\nStrengths: ${aiResult.strengths}\nAreas for Improvement: ${aiResult.areasForImprovement}\nIndividualized Activity: ${aiResult.individualizedActivity}\nSpelling and Grammar: ${aiResult.spellingAndGrammar}\nReasoning: ${aiResult.reasoning}`,
 				...aiResult
 			}),
 			{
