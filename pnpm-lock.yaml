@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@azure/ai-projects':
-        specifier: 1.0.0-beta.4
-        version: 1.0.0-beta.4
+        specifier: 1.0.0-beta.5
+        version: 1.0.0-beta.5
       '@azure/identity':
         specifier: ^4.9.0
         version: 4.9.0
@@ -114,8 +114,8 @@ packages:
     resolution: {integrity: sha512-nBrLsEWm4J2u5LpAPjxADTlq3trDgVZZXHNKabeXZtpq3d3AbN/KGO82R87rdDz5/lYB024rtEf10/q0urNgsA==}
     engines: {node: '>=18.0.0'}
 
-  '@azure/ai-projects@1.0.0-beta.4':
-    resolution: {integrity: sha512-+sRwbmNVQd/2atMF9lyfeIIhk7f0POyFiTUvdtiqRfqO6oeVOD4VhA3UaAFITD1JOIeAmRe4l+BwdX1Xy9FGzQ==}
+  '@azure/ai-projects@1.0.0-beta.5':
+    resolution: {integrity: sha512-cjTm7efAJPJb7dDzd5sl8QDtgkyNbe+02oKcdJScytYGgiAI25ugddHy81buZftc6e3eAuiw9jPLoSCx6p75mQ==}
     engines: {node: '>=18.0.0'}
 
   '@azure/core-auth@1.9.0':
@@ -2388,7 +2388,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@azure/ai-projects@1.0.0-beta.4':
+  '@azure/ai-projects@1.0.0-beta.5':
     dependencies:
       '@azure-rest/core-client': 2.3.5
       '@azure/abort-controller': 2.1.2
