@@ -40,111 +40,104 @@
 	}
 
 	async function handleSubmit(event: Event) {
-		event.preventDefault();
-		submitting = true;
-		successMsg = '';
-		errorMsg = '';
-		const THINKING_EVENT = { tool: 'thinking', time: new Date().toISOString() };
-		function ensureThinkingStep(events) {
-			// Remove any existing 'thinking' event
-			const filtered = events.filter((e) => e.tool !== 'thinking');
-			return [THINKING_EVENT, ...filtered];
-		}
-		toolEvents = [THINKING_EVENT];
+	event.preventDefault();
+	submitting = true;
+	successMsg = '';
+	errorMsg = '';
+	const THINKING_EVENT = { tool: 'thinking', time: new Date().toISOString() };
+	function ensureThinkingStep(events) {
+		// Remove any existing 'thinking' event
+		const filtered = events.filter((e) => e.tool !== 'thinking');
+		return [THINKING_EVENT, ...filtered];
+	}
+	toolEvents = [THINKING_EVENT];
 
-		// Generate a unique roomId for this submission
-		roomId = crypto.randomUUID();
-		// Connect to PartyKit for this session
-		if (ws) ws.close();
-		ws = new WebSocket(`${PARTYKIT_BASE_URL}/party/tool-usage-server-${roomId}`);
-		ws.onmessage = (event) => {
-			try {
-				const data = JSON.parse(event.data);
-				toolEvents = ensureThinkingStep([...toolEvents, data]);
-			} catch {}
-		};
+	// Generate a unique roomId for this submission
+	roomId = crypto.randomUUID();
+	// Connect to PartyKit for this session
+	if (ws) ws.close();
+	ws = new WebSocket(`${PARTYKIT_BASE_URL}/party/tool-usage-server-${roomId}`);
+	ws.onmessage = (event) => {
+		try {
+			const data = JSON.parse(event.data);
+			toolEvents = ensureThinkingStep([...toolEvents, data]);
+		} catch {}
+	};
 
-		if (!taskDescription.trim()) {
-			errorMsg = 'Please provide a description of the task or assignment.';
+	if (!taskDescription.trim()) {
+		errorMsg = 'Please provide a description of the task or assignment.';
+		submitting = false;
+		return;
+	}
+	const formData = new FormData();
+	formData.append('task', taskDescription.trim());
+
+	if (file) {
+		formData.append('file', file);
+	} else if (textInput.trim().length > 0) {
+		formData.append('text', textInput.trim());
+	}
+	formData.append('roomId', roomId);
+	formData.append('hitl', hitl ? 'true' : 'false');
+
+	try {
+		const response = await fetch('/api/grade', {
+			method: 'POST',
+			body: formData
+		});
+		const data = await response.json();
+		if (!data.success) {
+			errorMsg = data.error || 'Failed to start grading.';
 			submitting = false;
 			return;
 		}
-		const formData = new FormData();
-		formData.append('task', taskDescription.trim());
+		const { threadId, runId } = data;
+		await pollForStatus(threadId, runId);
+	} catch (err: any) {
+		errorMsg = err.message || 'Failed to start grading.';
+		submitting = false;
+	}
+}
 
-		if (file) {
-			formData.append('file', file);
-		} else if (textInput.trim().length > 0) {
-			formData.append('text', textInput.trim());
-		}
-		formData.append('roomId', roomId);
-		formData.append('hitl', hitl ? 'true' : 'false');
-
-		errorMsg = '';
+async function pollForStatus(threadId: string, runId: string) {
+	humanReviewRequired = false;
+	aiReasoning = '';
+	hitlContext = null;
+	let polling = true;
+	while (polling) {
+		await new Promise((resolve) => setTimeout(resolve, 1500));
 		try {
-			const response = await fetch('/api/grade', {
-				method: 'POST',
-				body: formData
-			});
-
-			let result;
-			try {
-				result = await response.json();
-			} catch (err) {
-				console.error('Error parsing /api/grade response:', err);
-				errorMsg = 'Received an invalid response from the server.';
+			const res = await fetch(`/api/grade/status?threadId=${encodeURIComponent(threadId)}&runId=${encodeURIComponent(runId)}`);
+			const statusData = await res.json();
+			if (!statusData.success) {
+				errorMsg = statusData.error || 'Unknown error during grading.';
 				submitting = false;
 				return;
 			}
-			if (response.ok && result.success) {
-				if (result.grade === 'HUMAN_REVIEW_REQUIRED') {
-					humanReviewRequired = true;
-					aiReasoning = result.reasoning;
-					hitlContext = result.hitlContext || { threadId: result.threadId, runId: result.runId };
-					submitting = false;
-					return;
-				}
-
-				try {
-					// Save to localStorage history
-					let prev = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
-					const entry = {
-						timestamp: Date.now(),
-						...result,
-						submission: result.submission || textInput || '',
-						task: taskDescription
-					};
-					prev.unshift(entry);
-					localStorage.setItem('assessmentHistory', JSON.stringify(prev.slice(0, 50)));
-				} catch {}
-
-				// Redirect to /results if HITL is not needed
-				window.location.assign('/results');
-
-				file = null;
-				textInput = '';
-				taskDescription = '';
-				return;
-			} else {
-				console.error('Grade API error or non-success:', response, result);
-				if (result && result.error) {
-					errorMsg = `Sorry, something went wrong: ${result.error}`;
-				} else if (response.status === 413) {
-					errorMsg = 'The uploaded file is too large. Please upload a smaller file.';
-				} else if (response.status >= 500) {
-					errorMsg = 'The server encountered an error. Please try again later.';
-				} else {
-					errorMsg = 'An unknown error occurred. Please check your input and try again.';
+			toolEvents = statusData.toolEvents || toolEvents;
+			if (statusData.status === 'completed') {
+				polling = false;
+				submitting = false;
+				if (statusData.result) {
+					const result = statusData.result;
+					aiReasoning = result.reasoning || '';
+					if (statusData.humanReviewRequired) {
+						humanReviewRequired = true;
+						hitlContext = { threadId, runId };
+					} else {
+						successMsg = `Suggested Grade: ${result.grade}\nStrengths: ${result.strengths}\nAreas for Improvement: ${result.areasForImprovement}\nIndividualized Activity: ${result.individualizedActivity}\nSpelling and Grammar: ${result.spellingAndGrammar}\nReasoning: ${result.reasoning}`;
+					}
+				} else if (statusData.parseError) {
+					errorMsg = statusData.parseError;
 				}
 			}
-		} catch (err) {
-			console.error('Error submitting grade:', err);
-			errorMsg = 'Network or server error. Please check your connection and try again.';
-		} finally {
-			// Disabled to make the transition to the results page smoother
-			// submitting = false;
+		} catch (err: any) {
+			errorMsg = err.message || 'Failed to poll grading status.';
+			submitting = false;
+			return;
 		}
 	}
+}
 
 	async function submitHumanReview() {
 		submitting = true;

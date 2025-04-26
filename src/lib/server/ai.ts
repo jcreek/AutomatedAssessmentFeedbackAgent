@@ -283,12 +283,14 @@ async function processRunStream(
 	throw new Error('Stream ended without completion');
 }
 
+export { client, agent };
+
 export async function gradeSubmissionWithAgent(
 	submission: string,
 	task: string,
 	roomId: string,
 	hitl: boolean = false
-): Promise<OpenAIResponse> {
+): Promise<{ threadId: string; runId: string }> {
 	if (!client || !agent) {
 		throw new Error('Agent not available');
 	}
@@ -301,52 +303,16 @@ export async function gradeSubmissionWithAgent(
 			: buildGradingPrompt(submission, task)
 	});
 
-	let initialStream: AsyncIterable<RunStreamEvent>;
 	try {
-		const runInvoker = client.agents.createRun(thread.id, agent.id, {
+		const run = await client.agents.createRun(thread.id, agent.id, {
 			parallelToolCalls: false
 		});
-		initialStream = await runInvoker.stream();
+		return { threadId: thread.id, runId: run.id };
 	} catch (err) {
 		logger.error(`Failed to start run on thread ${thread.id}:`, err);
 		logger.info('Task:', task);
 		logger.info('Submission', submission);
-		return fallbackGrade(submission, task);
-	}
-
-	// process all tool calls
-	let finalRun: ThreadRunOutput;
-	try {
-		finalRun = await processRunStream(thread.id, initialStream, roomId);
-	} catch (err) {
-		logger.error(`Agent streaming failed on thread ${thread.id}:`, err);
-		return fallbackGrade(submission, task);
-	}
-
-	const msgs = await client.agents.listMessages(thread.id);
-	const assistant = msgs.data.find((m) => m.role === 'assistant');
-	const raw = assistant ? extractTextFromMessage(assistant) : '';
-
-	// strip anything before the JSON object
-	const match = raw.match(/\{[\s\S]*\}$/);
-	const jsonText = match ? match[0] : raw;
-
-	try {
-		const parsed = JSON.parse(jsonText) as OpenAIResponse;
-		if (parsed.grade === 'HUMAN_REVIEW_REQUIRED') {
-			return {
-				...parsed,
-				success: true,
-				threadId: thread.id,
-				runId: finalRun?.id ?? undefined,
-				hitlContext: { threadId: thread.id, runId: finalRun?.id ?? undefined }
-			};
-		}
-		return parsed;
-	} catch (parseErr) {
-		logger.error(`JSON parse failed, returning fallback on thread ${thread.id}:`, parseErr);
-		logger.info('JSON', jsonText);
-		return { ...fallbackGrade(submission, task), reasoning: raw };
+		throw new Error('Failed to start grading run.');
 	}
 }
 

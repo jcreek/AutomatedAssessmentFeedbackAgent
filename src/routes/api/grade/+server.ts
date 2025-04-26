@@ -35,15 +35,15 @@ export const POST: RequestHandler = async (event: RequestEvent) => {
 			return new Response(JSON.stringify({ error: 'No valid input provided.' }), { status: 400 });
 		}
 
-		// Call the AI grading agent with threading and fallback
-		const aiResult = await gradeSubmissionWithAgent(submission, task.trim(), roomId ?? '', hitl);
+		// Call the AI grading agent asynchronously
+		const { threadId, runId } = await gradeSubmissionWithAgent(submission, task.trim(), roomId ?? '', hitl);
 
 		return new Response(
 			JSON.stringify({
 				success: true,
 				task: task.trim(),
-				feedback: `Suggested Grade: ${aiResult.grade}\nStrengths: ${aiResult.strengths}\nAreas for Improvement: ${aiResult.areasForImprovement}\nIndividualized Activity: ${aiResult.individualizedActivity}\nSpelling and Grammar: ${aiResult.spellingAndGrammar}\nReasoning: ${aiResult.reasoning}`,
-				...aiResult
+				threadId,
+				runId
 			}),
 			{
 				status: 200,
