@@ -122,3 +122,35 @@ export async function deleteAllAgents() {
 		console.warn('Failed to delete all agents:', err);
 	}
 }
+
+/**
+ * Delete all threads in the workspace.
+ * Use with caution! This will remove ALL threads.
+ */
+export async function deleteAllThreads() {
+    try {
+        let allThreads: any[] = [];
+        let after: string | undefined = undefined;
+        let hasMore = true;
+
+        while (hasMore) {
+            const response = await client.agents.listThreads(after ? { after } : {});
+            const threads = Array.isArray(response.data) ? response.data : [];
+            allThreads = allThreads.concat(threads);
+            hasMore = response.hasMore;
+            after = response.lastId;
+        }
+
+        for (const thread of allThreads) {
+            await client.agents.deleteThread(thread.id, {
+                requestOptions: {
+                    headers: { 'x-ms-enable-preview': 'true' }
+                }
+            });
+            console.info(`Thread ${thread.id} deleted.`);
+        }
+        console.info('All threads deleted successfully.');
+    } catch (err) {
+        console.warn('Failed to delete all threads:', err);
+    }
+}
