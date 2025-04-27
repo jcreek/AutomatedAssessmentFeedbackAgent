@@ -19,13 +19,21 @@ Created using:
 
 ---
 
-## 📽️ Demonstration Video
+## 📽️ Demonstration and Hackathon Experience Video
 
 [Watch it on YouTube](https://www.youtube.com/watch?v=FAi9-s9WP84)
 
 ---
 
 ## ✨ Live Demos / Key Functionality
+
+**Key Features:**
+
+- Instant, AI-powered grading and feedback
+- Human-in-the-Loop escalation for ambiguous cases
+- Real-time agentic tool use and transparent reasoning
+- Assessment history stored locally for privacy
+- Fully tested and CI-backed for reliability
 
 Below are GIF demonstrations of the Automated Assessment Feedback Agent in action, showcasing core features and real-world scenarios:
 
@@ -63,10 +71,12 @@ _The agent evaluates a programming submission, running code tests and generating
 4. [Who Is This For?](#4-who-is-this-for)
 5. [How It Works](#5-how-it-works)
 6. [Technical Details](#6-technical-details)
-7. [Human-in-the-Loop Innovation](#7-human-in-the-loop-innovation)
-8. [Accessibility and Responsible AI](#8-accessibility-and-responsible-ai)
-9. [Setup, Usage, and Testing](#9-setup-usage-and-testing)
-10. [License](#10-license)
+7. [Automated Testing & Quality Assurance](#7-automated-testing--quality-assurance)
+8. [Human-in-the-Loop Innovation](#8-human-in-the-loop-innovation)
+9. [Accessibility and Responsible AI](#9-accessibility-and-responsible-ai)
+10. [Security & Privacy](#10-security--privacy)
+11. [Setup, Usage, and Testing](#11-setup-usage-and-testing)
+12. [License](#12-license)
 
 ---
 
@@ -197,7 +207,24 @@ System architecture diagram showing component hosting, communication flows (HTTP
 
 ---
 
-## 7. Human-in-the-Loop Innovation
+## 7. Automated Testing & Quality Assurance
+
+This project is built with a strong focus on reliability and correctness:
+
+- **Comprehensive BDD Tests:** All core features are covered by automated, scenario-based tests using [Cucumber](https://cucumber.io/) and [Playwright](https://playwright.dev/).
+- **Continuous Integration:** Every commit to the `main` branch triggers a full test suite via GitHub Actions ([see badge above](#ai-powered-automated-assessment-and-feedback-agent)), ensuring nothing breaks unexpectedly.
+- **Real-World Scenarios:** Tests simulate real teacher/student interactions.
+- **Easy to Run:**
+  ```bash
+  pnpm run test:bdd
+  ```
+  Or view the [test scripts](./tests/bdd).
+
+**Result:** You can trust that this agent works—every time.
+
+---
+
+## 8. Human-in-the-Loop Innovation
 
 ### How It Works
 
@@ -211,13 +238,9 @@ System architecture diagram showing component hosting, communication flows (HTTP
 - **Control:** Teachers remain in the loop for edge cases, ensuring fairness and pedagogical soundness.
 - **Innovation:** This collaborative workflow demonstrates how agentic AI can augment, not replace, expert educators—addressing a key hackathon challenge.
 
-### Demo
-
-> Upload a blank or nonsense submission to trigger the HITL workflow and see the transparent escalation.
-
 ---
 
-## 8. Accessibility and Responsible AI
+## 9. Accessibility and Responsible AI
 
 ### Accessibility
 
@@ -238,7 +261,18 @@ I am committed to responsible and ethical use of AI in education. This project:
 
 ---
 
-## 9. Setup, Usage, and Testing
+## 10. Security & Privacy
+
+- **No Persistent Storage:** All assessment history and student data are stored only in the user’s browser (localStorage). Nothing is ever uploaded to or retained on any backend server or database.
+- **Ephemeral AI Agent Threads:** AI agent threads and any temporary data created during assessment are deleted immediately after grading is complete.
+- **No Data Sharing:** Student data is never shared with third parties, used for model training, or processed for any purpose other than providing instant feedback.
+- **User Control:** Users can review and clear their assessment history at any time from within the app.
+- **Secure Communication:** All interactions with the Azure AI Agent Service are performed over secure, encrypted channels (HTTPS/WSS).
+- **Privacy by Design:** The system is architected to maximize privacy and minimize data exposure at every step.
+
+---
+
+## 11. Setup, Usage, and Testing
 
 ### Prerequisites
 
@@ -318,18 +352,19 @@ For more information, see the `package.json` scripts section.
 
 ---
 
-## 10. License
+## 12. License
 
 Licensed under the Business Source License 1.1.  
 See LICENSE file for details.
 
 ---
 
-## 🔮 Future Enhancements
+## 13. Future Enhancements
 
 - Integration with major Learning Management Systems (LMS) for streamlined workflow.
 - Expansion of supported assignment types and subjects.
 - Development of analytics dashboards for deeper insights into class performance.
+- Image upload for handwritten work, especially for teachers of younger students.
 
 ---
 
