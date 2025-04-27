@@ -12,6 +12,11 @@ Built for the [Microsoft Hack Together: AI Agents Hackathon](https://microsoft.g
 Status: Hackathon prototype/MVP.  
 See the [Official Rules](https://microsoft.github.io/AI_Agents_Hackathon/rules/).
 
+Created using:
+
+- JavaScript/TypeScript
+- Azure AI Agent Service
+
 ---
 
 ## 📽️ Demonstration Video
@@ -174,11 +179,13 @@ The architecture includes:
   - /api/hitl-review: Handles teacher review, resumes AI grading
 - Third-Party Services:
   - Azure OpenAI (AI grading, feedback)
-  - Azure Cognitive Services (if used)
+  - Azure AI Agent Service (agentic workflow orchestration, tool use, LLM integration)
   - PartyKit (WebSocket server for real-time updates)
 - Data Storage: Only in browser (localStorage), no backend DB
 
-Actual diagram - TODO
+System architecture diagram showing component hosting, communication flows (HTTP, WebSocket), and external AI service integrations:
+
+![Architecture Diagram](docs/images/hackathon-architecture.png)
 
 ---
 
@@ -186,7 +193,7 @@ Actual diagram - TODO
 
 - **Frontend:** [SvelteKit](https://kit.svelte.dev/) + [TypeScript](https://www.typescriptlang.org/)
 - **Real-time Events:** [PartyKit](https://partykit.io/)
-- **AI:** [Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service) + [Azure Cognitive Services](https://azure.microsoft.com/en-us/products/ai-services/cognitive-services)
+- **AI & Agent Orchestration:** [Azure AI Agent Service](https://azure.microsoft.com/en-us/products/ai-services/ai-agent-service) (agentic workflows, tool use) + [Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service) (LLMs)
 
 ---
 
