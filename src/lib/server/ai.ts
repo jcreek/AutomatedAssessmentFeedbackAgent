@@ -320,6 +320,7 @@ export async function gradeSubmissionWithAgent(
 		finalRun = await processRunStream(thread.id, initialStream, roomId);
 	} catch (err) {
 		logger.error(`Agent streaming failed on thread ${thread.id}:`, err);
+		client.agents.deleteThread(thread.id);
 		return fallbackGrade(submission, task);
 	}
 
@@ -330,6 +331,8 @@ export async function gradeSubmissionWithAgent(
 	// strip anything before the JSON object
 	const match = raw.match(/\{[\s\S]*\}$/);
 	const jsonText = match ? match[0] : raw;
+
+	client.agents.deleteThread(thread.id);
 
 	try {
 		const parsed = JSON.parse(jsonText) as OpenAIResponse;
@@ -376,6 +379,7 @@ export async function resumeAgentWithHumanReview(
 		finalRun = await processRunStream(threadId, stream, roomId);
 	} catch (err) {
 		logger.error(`Agent streaming failed on thread ${threadId}:`, err);
+		client.agents.deleteThread(threadId);
 		return fallbackGrade('', '');
 	}
 
@@ -386,6 +390,8 @@ export async function resumeAgentWithHumanReview(
 	// strip anything before the JSON object
 	const match = raw.match(/\{[\s\S]*\}$/);
 	const jsonText = match ? match[0] : raw;
+
+	client.agents.deleteThread(threadId);
 
 	try {
 		const parsed = JSON.parse(jsonText) as OpenAIResponse;
