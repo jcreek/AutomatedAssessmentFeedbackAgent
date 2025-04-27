@@ -1,0 +1,73 @@
+================
+
+Write me a 1 paragraph essay on the power of Lockhart in Harry Potter.
+
+**Content (5 points)**  
+- Clearly explains who Lockhart is and his role in the story  
+- Includes at least one example of his power or actions  
+- Stays on topic and shows understanding of the character  
+
+**Spelling and Grammar (5 points)**  
+- Uses age-appropriate spelling and grammar  
+- Mistakes are consistent with an 11-year-old’s writing  
+- Writing is still easy to understand despite errors  
+
+**Structure (5 points)**  
+- Has a clear beginning, middle, and end  
+- Ideas are organized in a logical way  
+- Paragraph stays focused on one main idea  
+
+**Creativity and Voice (5 points)**  
+- Writing sounds like a real kid’s voice  
+- Shows original thought or a personal take on Lockhart  
+- Adds interest or personality to the explanation  
+
+-----------
+
+Gilderoy Lockhart is a wizard in Harry Potter who seems really cool at first but he’s actualy not that great. He tells lots of storys about the things he did, like fighting monsters and saving people, but he didn’t realy do any of it. He just took other peoples storys and made them his own by erasing their memarys with magic. He’s really good at the memory charm, which is kinda scary cuz he used it to lie to everyone. People liked him just because he was famous and good looking, not because he was smart or brave. In the end, he shows that being popular dosen’t mean your a real hero, and its wrong to take credit for stuff you didn’t do.
+
+==============
+
+Essay for AQA Sociology Evaluate the view that sociology and social research should be value free (out of 20)
+
+------------
+
+The view that sociology is and should be value free would be supported by positivist sociologists, who value objectivity and representativeness in their research. However, this argument is disputed by interpretivists who argue the imposition of value is impossible to avoid. Value freedom as an idea is the removal of bias, agenda or any preference from research. As was previously mentioned, positivists believe that sociology should be value-free because they are discovering objective laws about how society functions and how we can help it continue to function. For example, Marx applied this principle to his own work and economic theories , he treated it scientifically in the sense that he wanted to reveal the truth behind the exploitation and alienation in capitalism to help discover a good society. He believed his analysis on historic materialism could reveal the truth about society. He channelled this idea into his social research, which he hoped could make the proletariat aware of the exploitation that they are facing and break through their false class consciousness. In this sense, Marx is a typical positivist and demonstrates how sociology and social research should be value free because science is the best means possible to prove your work to individuals and gain belief about your theory, since it is falsifiable and testable to be able to move forward with social policies to improve the situation. However, the positivist view has been largely criticised over the years because committed sociologists would say its impossible to leave values out of sociology because the researcher's values will be reflected in the research. It is also undesirable as without values, sociologists are not making a positive difference to society. However, interpretivist would argue for the cause of value laden sociology and research. Weber, the father figure of interactionism, stated that values should be used in research to guide it and interpret the data. He recognises that sociologists are humans not lifeless robots and cannot ever manage to be fully objective. Also, the fact that when studying humans, they are not like elements but instead are breathing beings who have feelings and emotions and deserved to be study as such, and treated with emotion, such as through values. Weber coined the idea of ‘Verstehen’ the German phrase for insight or understanding and said that in-depth and good research should involve ‘Verstehen’. This again argued in favour of values to be able to put yourself as a researcher in the position of your participants to be properly able to know best how to study and help them. Therefore, interpretivists would strongly argue against the idea that sociology and social research should be value free because they recognise the importance of gaining an understanding of your topic which can only be possible by imposing values like caring and empathy. However, due to this interpretivists have struggled with many methodological issues due to this approach, they opt for methods like interviews and observation which can lead to both a lack of reliability and representativeness which aren’t useful characteristics when trying to create applicable social research. Finally, further interactionist arguments would also argue against the idea that sociology should be value freedom as with social research. Becker argues that sociologists should take the stance of the ‘underdogs. They should research less-known groups and support groups whose voices need to be heard. This idea was furthered by Gouldner who felt that they should take the stance of those who are fighting back and should be committed to ending oppression. Thus, any values involved should be ones of trying to beat stereotypes and marginalisation – if you treat ostracised groups like they are in the same situation and have the same equality of opportunity as majority groups, society’s will never be able to evolve and keep improving. They may apply this in their approach to research such as Sharpe’s interviews with women about improving aspirations. In which to treat a study on gender expectations appropriately she needed to apply her own values as a female researcher and understanding of gender boundaries such as the ‘glass ceiling’. Therefore, interactionists like Becker and Gouldner would prefer value laden sociology over value free sociology because it is more appropriate when trying to help oppressed or underrepresented groups as you are taking into account their experiences. However, positivists like Durkheim argue that sociology is a science and should be treated like one, and if that is the case, science must be treated as factual and not opinion based so must be free from their personal agenda or values. To conclude, due to the nature of sociology as often attempting to improve society and the experiences of individuals, one could argue that it should not be value free as it is interpersonal. Instead, research should involve and be motivated by a researchers belief as that will make it stronger and even during the process of choosing your subject it will be impossible to not involve values. 
+
+================
+
+Please may you assess the following piece of writing compared to the Year 6 Expected standard? Thank you! 
+
+-------------
+
+It was a cold and snowy day. Alma walked through the narrow street. She wore a big coat and boots. Her cheeks were red from the cold. She stopped in front of a strange shop. It looked old and quiet. The windows were dusty and dark.
+
+Alma saw a doll in the window. It looked just like her. Same clothes, same hair, same face. She was surprised. She wanted to see it up close. She tried to open the door, but it was locked. Suddenly, the door creaked open by itself. Alma looked around. Nobody was there. She went inside.
+
+The shop was full of dolls. They were all different sizes. Some were smiling. Some looked sad. Alma walked slowly. The doll that looked like her was now on a high shelf. She wanted to reach it. She climbed on a table.
+
+Then, something strange happened. She touched the doll—and everything went dark. Alma could not move. She was inside the doll. Her eyes looked out, but her body was stiff. Another doll appeared in the window. It looked like a new child.
+
+================
+
+2. Write a pseudocode algorithm that asks a user for a password. They are allowed three attempts to type the correct password, which is “Tues1212”.
+If they type the correct password, output “Password accepted”, otherwise output “Password rejected”. [6]
+
+----------------
+
+Correct_password = "Tues1212"
+password = False
+
+for x in range(3):
+    if password == False:
+        user = input("Enter password: ")
+        if user == Correct_password:
+            password_accepted = True
+
+if password == True:
+    print("Password accepted")
+else:
+    print("Password rejected")
+
+
+===================
