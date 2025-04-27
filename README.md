@@ -16,7 +16,37 @@ See the [Official Rules](https://microsoft.github.io/AI_Agents_Hackathon/rules/)
 
 ## 📽️ Demonstration Video
 
-[Coming soon: View a full demonstration of the agent in action.]
+[Watch it on YouTube](https://www.youtube.com/watch?v=FAi9-s9WP84)
+
+---
+
+## ✨ Live Demos / Key Functionality
+
+Below are GIF demonstrations of the Automated Assessment Feedback Agent in action, showcasing core features and real-world scenarios:
+
+### 1. Human-in-the-Loop (HITL): Wrong Assignment Provided
+
+_The agent detects when a student submits the wrong assignment and facilitates teacher intervention._
+
+![HITL: Wrong Assignment](docs/images/hack1.gif)
+
+### 2. HITL: English as an Additional Language (EAL) Student
+
+_Demonstrates tailored feedback and HITL support for a student with EAL needs._
+
+![HITL: EAL Student](docs/images/hack2.gif)
+
+### 3. Assessing a Wordy Essay-Type Task
+
+_Shows the agent analyzing and providing feedback on a complex, open-ended essay response._
+
+![Essay Assessment](docs/images/hack3.gif)
+
+### 4. Assessing a Computer Science Coding Task
+
+_The agent evaluates a programming submission, running code tests and generating feedback._
+
+![Coding Task Assessment](docs/images/hack4.gif)
 
 ---
 
@@ -136,19 +166,19 @@ This shows the big-picture technical structure and how my chosen technologies fi
 The architecture includes:
 
 - Frontend: SvelteKit app (browser)
-   - Connects to PartyKit (for real-time events)
-   - Calls API endpoints (/api/grade, /api/hitl-review)
-   - Saves assessment history in browser localStorage
+  - Connects to PartyKit (for real-time events)
+  - Calls API endpoints (/api/grade, /api/hitl-review)
+  - Saves assessment history in browser localStorage
 - Backend: SvelteKit API routes (serverless functions, e.g., Netlify)
-   - /api/grade: Handles grading, talks to Azure OpenAI
-   - /api/hitl-review: Handles teacher review, resumes AI grading
+  - /api/grade: Handles grading, talks to Azure OpenAI
+  - /api/hitl-review: Handles teacher review, resumes AI grading
 - Third-Party Services:
-   - Azure OpenAI (AI grading, feedback)
-   - Azure Cognitive Services (if used)
-   - PartyKit (WebSocket server for real-time updates)
+  - Azure OpenAI (AI grading, feedback)
+  - Azure Cognitive Services (if used)
+  - PartyKit (WebSocket server for real-time updates)
 - Data Storage: Only in browser (localStorage), no backend DB
 
-Actual diagram - TODO 
+Actual diagram - TODO
 
 ---
 
