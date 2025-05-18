@@ -39,17 +39,70 @@
 		errorMsg = '';
 	}
 
+	// Poll for completion of the grading operation
+	interface PollResult {
+		completed: boolean;
+		result?: any;
+	}
+
+	interface ToolEvent {
+		tool: string;
+		time: string;
+		// Add other properties as needed
+	}
+
+	async function pollForCompletion(threadId: string, runId: string, maxAttempts = 60, interval = 2000): Promise<PollResult> {
+		let attempts = 0;
+		
+		const checkStatus = async (): Promise<PollResult> => {
+			try {
+				const response = await fetch(`/api/grade/status/${threadId}`);
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				
+				const result = await response.json() as PollResult;
+				
+				if (result.completed) {
+					// If we have a result, return it
+					if (result.result) {
+						return result;
+					}
+					// If no result but completed, throw an error
+					throw new Error('Operation completed but no result was returned');
+				}
+				
+				// If not completed and we have attempts left, poll again
+				if (attempts < maxAttempts) {
+					attempts++;
+					await new Promise(resolve => setTimeout(resolve, interval));
+					return checkStatus();
+				}
+				
+				// Max attempts reached
+				throw new Error('Operation timed out');
+			} catch (error) {
+				console.error('Error polling status:', error);
+				throw error;
+			}
+		};
+		
+		return checkStatus();
+	}
+
 	async function handleSubmit(event: Event) {
 		event.preventDefault();
 		submitting = true;
 		successMsg = '';
 		errorMsg = '';
 		const THINKING_EVENT = { tool: 'thinking', time: new Date().toISOString() };
-		function ensureThinkingStep(events) {
+		
+		function ensureThinkingStep(events: ToolEvent[]): ToolEvent[] {
 			// Remove any existing 'thinking' event
-			const filtered = events.filter((e) => e.tool !== 'thinking');
+			const filtered = events.filter((e: ToolEvent) => e.tool !== 'thinking');
 			return [THINKING_EVENT, ...filtered];
 		}
+		
 		toolEvents = [THINKING_EVENT];
 
 		// Generate a unique roomId for this submission
@@ -69,6 +122,7 @@
 			submitting = false;
 			return;
 		}
+
 		const formData = new FormData();
 		formData.append('task', taskDescription.trim());
 
@@ -82,6 +136,7 @@
 
 		errorMsg = '';
 		try {
+			// Start the grading operation
 			const response = await fetch('/api/grade', {
 				method: 'POST',
 				body: formData
@@ -96,53 +151,64 @@
 				submitting = false;
 				return;
 			}
-			if (response.ok && result.success) {
-				if (result.grade === 'HUMAN_REVIEW_REQUIRED') {
-					humanReviewRequired = true;
-					aiReasoning = result.reasoning;
-					hitlContext = result.hitlContext || { threadId: result.threadId, runId: result.runId };
-					submitting = false;
-					return;
-				}
 
-				try {
-					// Save to localStorage history
-					let prev = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
-					const entry = {
-						timestamp: Date.now(),
-						...result,
-						submission: result.submission || textInput || '',
-						task: taskDescription
-					};
-					prev.unshift(entry);
-					localStorage.setItem('assessmentHistory', JSON.stringify(prev.slice(0, 50)));
-				} catch {}
-
-				// Redirect to /results if HITL is not needed
-				window.location.assign('/results');
-
-				file = null;
-				textInput = '';
-				taskDescription = '';
-				return;
-			} else {
-				console.error('Grade API error or non-success:', response, result);
-				if (result && result.error) {
-					errorMsg = `Sorry, something went wrong: ${result.error}`;
-				} else if (response.status === 413) {
-					errorMsg = 'The uploaded file is too large. Please upload a smaller file.';
-				} else if (response.status >= 500) {
-					errorMsg = 'The server encountered an error. Please try again later.';
-				} else {
-					errorMsg = 'An unknown error occurred. Please check your input and try again.';
-				}
+			if (!response.ok || !result.success) {
+				throw new Error(result.error || 'Failed to start grading operation');
 			}
-		} catch (err) {
-			console.error('Error submitting grade:', err);
-			errorMsg = 'Network or server error. Please check your connection and try again.';
-		} finally {
-			// Disabled to make the transition to the results page smoother
-			// submitting = false;
+
+			// Start polling for completion
+			try {
+				const pollResult = await pollForCompletion(result.threadId, result.runId);
+				
+				if (pollResult.result) {
+					// Handle the result
+					const finalResult = pollResult.result;
+					
+					if (finalResult.grade === 'HUMAN_REVIEW_REQUIRED') {
+						humanReviewRequired = true;
+						aiReasoning = finalResult.reasoning;
+						hitlContext = finalResult.hitlContext || { 
+							threadId: result.threadId, 
+							runId: result.runId 
+						};
+						submitting = false;
+						return;
+					}
+
+					// Save to localStorage history
+					try {
+						let prev = JSON.parse(localStorage.getItem('assessmentHistory') || '[]');
+						const entry = {
+							timestamp: Date.now(),
+							...finalResult,
+							submission: finalResult.submission || textInput || '',
+							task: taskDescription
+						};
+						prev.unshift(entry);
+						localStorage.setItem('assessmentHistory', JSON.stringify(prev.slice(0, 50)));
+					} catch (e) {
+						console.error('Error saving to history:', e);
+					}
+
+					// Redirect to results page
+					window.location.assign('/results');
+
+					// Reset form
+					file = null;
+					textInput = '';
+					taskDescription = '';
+				}
+			} catch (pollError: unknown) {
+				console.error('Error during polling:', pollError);
+				const errorMessage = pollError instanceof Error ? pollError.message : 'An unknown error occurred during polling';
+				errorMsg = `Error during grading: ${errorMessage}`;
+				submitting = false;
+			}
+		} catch (err: unknown) {
+			console.error('Error starting grading operation:', err);
+			const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+			errorMsg = `Failed to start grading: ${errorMessage}`;
+			submitting = false;
 		}
 	}
 
